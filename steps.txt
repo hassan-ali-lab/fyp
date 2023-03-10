@@ -1,0 +1,28 @@
+Installation
+Install Solidity and truffle
+npm install -g truffle solc
+
+create project 
+npx create-react-app .
+truffle init
+
+
+write contracts 
+write migrations
+
+truffle compile
+truffle migrate
+// truffle migrate --reset --compile-all
+
+
+ 
+npm i web3 web3modal ethers@5.7.2  ipfs-http-client react-bootstrap bootstrap @openzeppelin/contracts axios ethers metamask-react react-router-dom
+
+
+
+
+
+react-identicons
+https://www.youtube.com/watch?v=fJIiqeevqoU&ab_channel=DappMentors
+
+
