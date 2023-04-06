@@ -1,0 +1,115 @@
+.maincard {
+    border-radius: 20px;
+    overflow: hidden;
+    display: inline-block;
+    padding: 0;
+    margin: 0;
+    position: relative;
+    border: 1px solid black;
+}
+.card-image {
+    width: 100%;
+    height: 100%;
+    border-radius: 20px;
+    object-fit: cover;
+}
+
+.nft-trending {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    width: 100%;
+    height: 800px;
+    background-color: #121212;
+    color: #ffffff;
+}
+
+.cards-gallery {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    position: relative;
+    width: 100%;
+}
+
+.nft-trending-main {
+    padding: 100px 0 50px 0;
+}
+
+/* Gallery of photos */
+.left-card3 {
+    position: absolute;
+    width: 120px;
+    height: 250px;
+    left: 100px;
+    top: 60px;
+    z-index: 1;
+    transform: perspective(30px) rotateY(2deg);
+}
+
+.right-card2 {
+    position: absolute;
+    right: 210px;
+    width: 220px;
+    height: 280px;
+    top: 40px;
+    z-index: 1;
+    transform: perspective(30px) rotateY(-2deg);
+}
+
+.right-card3 {
+    position: absolute;
+    width: 120px;
+    height: 250px;
+    right: 100px;
+    top: 60px;
+    z-index: 1;
+    transform: perspective(30px) rotateY(-2deg);
+}
+
+.left-card2 {
+    position: absolute;
+    width: 220px;
+    height: 280px;
+    left: 210px;
+    top: 40px;
+    z-index: 1;
+    transform: perspective(30px) rotateY(2deg);
+}
+
+.left-card1 {
+    position: absolute;
+
+    width: 220px;
+    height: 300px;
+    left: 400px;
+    top: 10px;
+    z-index: 1;
+    transform: perspective(30px) rotateY(2deg);
+    /*transform: matrix(-1, 0, 0, 1, 0, 0);*/
+    /*box-shadow: 0 10px 26px rgba(0, 0, 0, 0.25);*/
+}
+
+.right-card1 {
+    position: absolute;
+    width: 220px;
+    height: 300px;
+    right: 400px;
+    top: 10px;
+    z-index: 1;
+    transform: perspective(30px) rotateY(-2deg);
+}
+
+
+.central-card {
+    border-radius: 20px;
+    position: relative;
+    transform: translateY(-10%);
+    margin: 0 auto;
+    padding: 0;
+    width: 250px;
+    height: 400px;
+    z-index: 1;
+}
+

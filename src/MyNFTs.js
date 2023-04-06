@@ -2,13 +2,10 @@
 import { ethers } from 'ethers'
 import { useEffect, useState } from 'react'
 import Web3Modal from 'web3modal'
-import { nftaddress, marketaddress, PinataAPI_KEY, PinataAPI_SECRET } from './configuration'
+import { nftaddress, marketaddress } from './config'
 import NFT from './build/contracts/NFT.json'
-// import { useRouter } from 'next/router'
 import Marketplace from './build/contracts/Marketplace.json'
-// import path from 'path'
 import axios from 'axios';
-import MyNavBar from './MyNavBar'
 import MyCard from './MyCard'
 
 

@@ -1,22 +1,25 @@
 Installation
-Install Solidity and truffle
+Install Node.js
+Install Ganache - https://www.trufflesuite.com/ganache
+Install Metamask - https://metamask.io/
+Install Solidity and truffle - https://www.trufflesuite.com/docs/truffle/getting-started/installation
 npm install -g truffle solc
 
-create project 
+create project folder
 npx create-react-app .
 truffle init
 
 
-write contracts 
-write migrations
+write contracts in solidity - https://docs.soliditylang.org/en/
+write migrations in javascript - https://www.trufflesuite.com/docs/truffle/getting-started/writing-migrations
 
 truffle compile
 truffle migrate
 // truffle migrate --reset --compile-all
 
 
- 
-npm i web3 web3modal ethers@5.7.2  ipfs-http-client react-bootstrap bootstrap @openzeppelin/contracts axios ethers metamask-react react-router-dom
+
+npm i web3 web3modal ethers@5.7.2  ipfs-http-client @openzeppelin/contracts axios ethers metamask-react react-router-dom
 
 
 

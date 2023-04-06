@@ -1,0 +1,16 @@
+
+
+
+.background-image {
+    /*background-image: url("https://i.imgur.com/9ZQ3Z9C.jpg");*/
+    background-image: url("../public/WalletAuthentication/header_background.png");
+    background-repeat: no-repeat;
+    background-size: cover;
+    /*background-position: center;*/
+    height: 30vh;
+    width: 100%;
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: -1;
+}

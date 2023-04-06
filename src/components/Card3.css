@@ -1,0 +1,26 @@
+
+.btn-timer {
+    position: absolute;
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    flex-direction: row;
+    top: -60px;
+    left: 50px;
+    background-color: rgba(204, 204, 204, 0.5);
+    /*border: 1px solid #FE3796;*/
+    border-radius: 100px;
+    box-sizing: border-box;
+    color: #ffffff;
+    cursor: pointer;
+    font-family: Circular, -apple-system, BlinkMacSystemFont, Roboto, "Helvetica Neue", sans-serif;
+    text-align: left;
+    text-decoration: none;
+    touch-action: manipulation;
+    transition: box-shadow .2s, -ms-transform .1s, -webkit-transform .1s, transform .1s;
+    user-select: none;
+    -webkit-user-select: none;
+    width: 120px;
+    height: 40px;
+    padding: 0 10px;
+}

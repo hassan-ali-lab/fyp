@@ -1,16 +1,33 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
-import './index.css';
 import App from './App';
-import { MetaMaskProvider } from 'metamask-react';
+import {MetaMaskProvider} from 'metamask-react';
+import {createBrowserRouter, RouterProvider} from "react-router-dom";
 
-import 'bootstrap/dist/css/bootstrap.min.css'
+
+const router = createBrowserRouter([{
+    path: "/", element: (<App/>)
+},
+    {
+        path: "/dashboard", element: <>hello world</>,
+    }
+]);
+
+// {
+//   path: "/mint-tokens",
+//   element: <MintTokens />,
+// },
+// {
+//   path: "/my-nfts",
+//   element: <MyNFTs />,
+// },
+// ]);
+
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
-root.render(
-    <React.StrictMode>
-        <MetaMaskProvider>
-            <App />
-        </MetaMaskProvider>
-    </React.StrictMode>
-);
+root.render(<React.Fragment>
+    <MetaMaskProvider>
+        <RouterProvider router={router}/>
+    </MetaMaskProvider>
+
+</React.Fragment>);

@@ -1,0 +1,160 @@
+
+.section1 {
+    position: relative;
+    height: 100vh;
+    width: 100%;
+    /*background-color: #000;*/
+    color: #fff;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: row;
+    text-align: center;
+    font-family: 'Roboto', sans-serif;
+}
+
+.section-1-background-image {
+    z-index: -1;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+}
+
+.div1 {
+    /*flex: 10;*/
+    height: 100%;
+    display: inline-block;
+    width: 55%;
+    /*background: rgba(84, 82, 82, 0.5);*/
+    padding: 120px;
+    text-align: left;
+}
+
+.div1 > h1 {
+    font-size: 40px;
+    font-weight: 700;
+}
+
+.div2 {
+    overflow: hidden;
+    display: inline-block;
+    position: relative;
+    width: 45%;
+    /*flex: 9;*/
+    height: 100%;
+    /*background: rgba(0, 0, 0, 0.5);*/
+}
+
+.section1-subtitle {
+    padding: 20px 0;
+}
+
+.statistics {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-direction: row;
+    font-family: 'Roboto', sans-serif;
+    /*padding: 20px 0;*/
+    /*background: #FE3796;*/
+}
+
+.statistics > div {
+    flex: 1;
+    padding: 40px 0;
+}
+
+.item1 > h1 {
+    color: #FC1994;
+    margin-bottom: 30px;
+}
+
+.item2 > h1 {
+    color: #9747FF;
+    margin-bottom: 30px;
+}
+
+.item3 > h1 {
+    color: #CB37FF;
+    margin-bottom: 30px;
+}
+
+
+/* CSS */
+.button-23 {
+    background-color: transparent;
+    border: 1px solid #FE3796;
+    border-radius: 100px;
+    box-sizing: border-box;
+    color: #FE3796;
+    cursor: pointer;
+    display: inline-block;
+    font-family: Circular, -apple-system, BlinkMacSystemFont, Roboto, "Helvetica Neue", sans-serif;
+    font-size: 16px;
+    font-weight: 600;
+    line-height: 20px;
+    margin: 0;
+    outline: none;
+    padding: 13px 50px;
+    position: relative;
+    text-align: center;
+    text-decoration: none;
+    touch-action: manipulation;
+    transition: box-shadow .2s, -ms-transform .1s, -webkit-transform .1s, transform .1s;
+    user-select: none;
+    -webkit-user-select: none;
+    width: auto;
+}
+
+
+.button-23:active {
+    background-color: transparent;
+    color: #ab698a;
+    border-color: #9f6985;
+    transform: scale(.96);
+}
+
+.button-23:disabled {
+    border-color: #DDDDDD;
+    color: #DDDDDD;
+    cursor: not-allowed;
+    opacity: 1;
+}
+
+.disp-card {
+    display: inline-block;
+    position: absolute;
+    overflow: hidden;
+}
+
+.card1 {
+    top: -160px;
+    left: 0;
+}
+
+.card2 {
+    top: 180px;
+    left: 0;
+}
+
+.card3 {
+    top: 500px;
+    left: 0;
+}
+.card4 {
+    top: 460px;
+    left: 350px;
+}
+.card5 {
+    top: 120px;
+    left: 350px;
+}
+.card6 {
+    top: -210px;
+    left: 350px;
+}

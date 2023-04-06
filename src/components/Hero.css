@@ -1,0 +1,165 @@
+
+.hero > img {
+    /* img inside class hero */
+    z-index: -1; /* img will be behind the content */
+    position: absolute; /* img will be positioned relative to the hero class */
+    top: 0; /* img will be positioned at the top of the hero class */
+    left: 0; /* img will be positioned at the left of the hero class */
+    width: 100%; /* img will be 100% of the width of the hero class */
+    height: 100%; /* img will be 100% of the height of the hero class */
+    object-fit: cover; /* img will cover the entire hero class */
+}
+
+.hero-sec1 {
+    width: 100%; /* 100% of the width of the parent */
+    position: relative; /* position relative to the parent */
+    display: flex; /* display flex */
+    flex-direction: row; /* flex direction row */
+    justify-content: space-between; /* justify content space between */
+    align-items: baseline; /* align items baseline */
+    padding: 0; /* padding 0 */
+
+}
+
+.hero-sec2 {
+    width: 100%; /* 100% of the width of the parent */
+    height: 700px; /* height 800px */
+}
+
+.hero {
+    position: relative; /* position relative to the parent */
+    width: 100%; /* 100% of the width of the parent */
+    display: flex; /* display flex */
+    flex-direction: column; /* flex direction column */
+    justify-content: space-between; /* justify content space between */
+    align-items: baseline; /* align items baseline */
+    overflow-x: hidden; /* overflow-x hidden */
+    padding: 0; /* padding 0 */
+    height: 100%; /* height 100% */
+}
+.hero-bg{
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -1;
+    opacity: 0.5;
+    background-size: cover;
+}
+.center-box {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+    width: 40%;
+    margin: 200px auto;
+    height: 400px;
+/*background: #FE3796;*/
+}
+
+.image1 {
+    flex: 1; /* flex 1 */
+}
+
+.image2 {
+    flex: 1; /* flex 1 */
+}
+
+.hero-image-1 {
+    /*top: 5px;*/
+    border-radius: 290px; /* border radius 290px */
+    left: 50px; /* left 50px */
+    width: 123px; /* width 123px */
+    height: 199px; /* height 199px */
+    position: absolute; /* position absolute */
+}
+
+.hero-image-2 {
+    top: 20px; /* top 20px */
+    right: -30px; /* right -30px */
+    position: absolute; /* position absolute */
+    width: 130px; /* width 130px */
+    height: 280px; /* height 280px */
+    border-radius: 290px; /* border radius 290px */
+}
+
+.hero-image-3 {
+    bottom: 20px; /* bottom 20px */
+    border-radius: 290px; /* border radius 290px */
+    left: 100px; /* left 100px */
+    width: 160px; /* width 160px */
+    height: 260px; /* height 260px */
+    position: absolute; /* position absolute */
+}
+
+.hero-image-4 {
+    position: absolute; /* position absolute */
+    right: 160px; /* right 160px */
+    bottom: 0; /* bottom 0 */
+    width: 130px; /* width 130px */
+    height: 240px; /* height 240px */
+    border-radius: 290px; /* border radius 290px */
+}
+
+.hero-image-5 {
+    left: 30px;
+    top: 50px;
+    position: absolute; /* position absolute */
+    width: 160px; /* width 130px */
+    height: 320px; /* height 240px */
+    border-radius: 290px; /* border radius 290px */
+}
+
+.hero-image-6 {
+    right: 30px;
+    top: 50px;
+    position: absolute; /* position absolute */
+    width: 160px; /* width 130px */
+    height: 320px; /* height 240px */
+    border-radius: 290px; /* border radius 290px */
+}
+
+.hero-image-7 {
+
+    position: absolute; /* position absolute */
+    width: 250px; /* width 130px */
+    height: 500px; /* height 240px */
+    border-radius: 290px; /* border radius 290px */
+}
+
+.hero-content {
+    /* Auto layout */
+    position: relative; /* position relative to the parent */
+    flex: 3; /* flex 3 */
+    display: flex; /* display flex */
+    flex-direction: column; /* flex direction column */
+    justify-content: flex-start; /* justify content flex-start */
+    align-items: center; /* align items center */
+    padding: 0; /* padding 0 */
+    gap: 32px; /* gap 32px */
+
+    width: 781px; /* width 781px */
+    text-align: center; /* text-align center */
+    font-weight: bold; /* font-weight bold */
+    font-size: 28px; /* font-size 28px */
+    margin-bottom: 200px; /* margin-bottom 200px */
+}
+
+.lg-digital-art {
+    padding: 30px 70px; /* padding 30px 70px */
+    color: white; /* color white */
+    background: #FE3796; /* background #FE3796 */
+    box-shadow: 0 0 100px rgba(0, 0, 0, 0.25); /* box-shadow 0 0 100px rgba(0, 0, 0, 0.25) */
+    transform: rotate(-3.79deg); /* transform rotate(-3.79deg) */
+}
+
+
+.sub-heading {
+    font-size: 22px; /* font-size 22px */
+    font-weight: normal; /* font-weight normal */
+    color: #000000; /* color #000000 */
+    text-align: center; /* text-align center */
+    margin-top: 30px; /* margin-top 30px */
+    width: 70%; /* width 70% */
+}
