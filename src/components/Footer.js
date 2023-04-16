@@ -1,4 +1,4 @@
-import styled from 'styled-components';
+import styled,{css} from 'styled-components';
 
 const image_url = process.env.PUBLIC_URL + '/footer/Footer.png';
 const instagram = process.env.PUBLIC_URL + '/footer/instagram.svg';
@@ -11,14 +11,13 @@ const Container = styled.div`
   //background-repeat: no-repeat;
   background-size: 100% 100%;
   //background-position: center;
-  width: 100%;
-  height: 700px;
+  width: 100%; 
+  ${  props => props.landingPage ? css`padding-top: 200px;height: 700px;` :  css`padding-top: 100px;height: 600px;`  }
   display: flex;
   flex-direction: column;
   justify-content: flex-end;
   align-items: center;
   color: #fff;
-  padding-top: 200px;
 
 
 `
@@ -161,14 +160,15 @@ const Column = styled.div`
   .title {
     margin: 0 0 20px 0;
   }
-  p{
+
+  p {
     margin: 0 0 10px 0;
     color: #777E90;
   }
 `
 
-function Footer() {
-    return (<Container>
+function Footer(props) {
+    return (<Container {...props}>
         <Section1>
             <div className={'footer-div1'}>
                 <h1>BuidlNFT</h1>
@@ -194,7 +194,7 @@ function Footer() {
                 <Column>
                     <h3 className={'title'}>My Account</h3>
 
-                    <p >Profile</p>
+                    <p>Profile</p>
                     <p>Favourites</p>
                     <p>Watchlist</p>
                     <p>My Collections</p>

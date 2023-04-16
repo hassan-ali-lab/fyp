@@ -1,9 +1,12 @@
 import styled from "styled-components";
 import Header from "./components/Header";
 import Footer from "./components/Footer";
+import {Link} from "react-router-dom";
+import {useState} from "react";
 
-const image1 = process.env.PUBLIC_URL + '/CreateNFT/image1.png';
-const image2 = process.env.PUBLIC_URL + '/CreateNFT/image2.png';
+const img1Url = process.env.PUBLIC_URL + '/create-nft-images/Image1.png';
+const img2Url = process.env.PUBLIC_URL + '/create-nft-images/Image2.png';
+
 
 const Container = styled.div`
   display: flex;
@@ -12,6 +15,9 @@ const Container = styled.div`
   justify-content: center;
   text-align: center;
   align-self: center;
+  a{
+    //color: #777E90;
+  }
   color: #777E90;
   width: 50%;
   margin: 0 auto;
@@ -34,9 +40,10 @@ const Container = styled.div`
 `
 
 const Card = styled.div`
+
   width: 100px;
   height: 100px;
-  //background-color: #bd3535;
+  background-color: #bd3535;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -44,25 +51,31 @@ const Card = styled.div`
 `
 
 function CreateNFTPage(props) {
+    const [image1, setImage1] = useState(img1Url);
+    const [image2, setImage2] = useState(img2Url);
+
     return (<div>
-        <Header/>
+        <Header pageTitle={"Create NFT"} linkTree={'create nft'}/>
         <Container>
             <div>Choose “Single” if you want your collectible to be one of a kind or “Multiple” if you want to
                 sell <br/> one collectible multiple times
             </div>
 
             <div className={'main'}>
-                <Card><img className={'image'} src={image1} alt=""/>
+                <Link to={'/create-nft-form'} ><Card>
+                    <img className={'image'} src={image1} alt=""/>
                     <div>Single NFT</div>
-                </Card>
+                </Card></Link>
                 <Card><img className={'image'} src={image2} alt=""/>
                     <div>Multiple NFT</div>
                 </Card>
             </div>
             <div>We do not own your private keys and cannot access your funds without your confirmation.</div>
+
         </Container>
         <Footer/>
-    </div>);
+    </div>)
+        ;
 }
 
 export default CreateNFTPage;

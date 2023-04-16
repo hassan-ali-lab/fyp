@@ -7,7 +7,6 @@ import Marketplace from "./build/contracts/Marketplace.json";
 import axios from "axios";
 import {useEffect, useState} from "react";
 import MyCard from './MyCard'
-import MyNavBar from './MyNavBar';
 
 function Dashboard() {
     const [nfts, setNFts] = useState([]);

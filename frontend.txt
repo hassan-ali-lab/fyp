@@ -1,0 +1,5 @@
+1) Landing Page
+2) Create NFT Page
+3) Create NFTs Form Page
+4) User Profile
+5) Edit Profile

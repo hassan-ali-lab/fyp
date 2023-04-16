@@ -1,4 +1,4 @@
-import Button from 'react-bootstrap/Button';
+import Button from 'react-bootstrap/Button.js';
 import Card from 'react-bootstrap/Card';
 
 function MyCard(props) {

@@ -7,7 +7,7 @@ const left_white_arrow = process.env.PUBLIC_URL + '/left_white_arrow.png';
 const right_white_arrow = process.env.PUBLIC_URL + '/right_white_arrow.svg';
 
 // styled components
-// Circuler Button
+// Circuler Button.js
 const CirculerBtn = styled.div`
   margin: 0 10px;
   display: inline-block;
@@ -20,7 +20,7 @@ const CirculerBtn = styled.div`
   border: 1px solid #ffffff;
   padding: 10px;
 `
-// Normal Button
+// Normal Button.js
 const Button = styled.button`
   background-color: #FE3796;
   border: 1px solid #FE3796;
@@ -78,7 +78,10 @@ function NFTCollectionExplore() {
         </div>
 
         <div className={'nft-collection-main'}>
-            <Header><Button>All NFTs</Button></Header>
+            <Header><Button onClick={() => {
+                // goto link
+                window.location.href = '/explore-nfts';
+            }}>All NFTs</Button></Header>
             <div className={'nft-collection-body'}>
                 {/*row 1*/}
                 <Card4/>

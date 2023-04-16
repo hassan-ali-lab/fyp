@@ -27,7 +27,12 @@ function section1(props) {
                     <div>Artists</div>
                 </div>
             </div>
-            <button className="button-23">Create</button>
+            <button className="button-23" onClick={
+                () => {
+                    window.location.href = "/create-nft"
+                }
+            }>Create
+            </button>
         </div>
         <div className={'div2'}>
             <div className={'disp-card card1'}>

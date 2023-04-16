@@ -2,10 +2,11 @@ import React from "react";
 import WalletAuthenticationPage from "./WalletAuthenticationPage";
 import LandingPage from "./LandingPage";
 import {useMetaMask} from "metamask-react";
+import EditProfile from "./EditProfile";
 
 
 function App() {
-    const {status, connect} = useMetaMask();
+    const {status, connect, account} = useMetaMask();
     if (status === "initializing") {
         return <div>Synchronisation with MetaMask ongoing...</div>;
     } else if (status === "unavailable") {
@@ -16,10 +17,11 @@ function App() {
         return <div>Connecting...</div>;
     } else if (status === "connected") {
         return <div>
-            <LandingPage/>
+         <LandingPage />
         </div>;
+    } else {
+        return <div>Unknown status Hello</div>;
     }
-    return <div>Unknown status Hello</div>;
 }
 
 export default App;

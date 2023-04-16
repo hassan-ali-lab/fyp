@@ -1,10 +1,15 @@
+import {Link} from "react-router-dom";
 import styled from "styled-components";
+import {useState} from "react";
+import DropDown from "./DropDown";
 
 const header_image_url = process.env.PUBLIC_URL + '/header/Header.png';
 const arrow_down_url = process.env.PUBLIC_URL + '/header/arrow-down-white.svg';
 const cart = process.env.PUBLIC_URL + '/header/Cart.svg';
 const night_mode = process.env.PUBLIC_URL + '/header/Night mode.svg';
 
+// pageTitle: string
+// linkTree: string
 
 const Container = styled.div`
   background-image: url(${header_image_url});
@@ -19,6 +24,7 @@ const Container = styled.div`
     font-size: 26px;
     -webkit-text-stroke-width: 1px;
     -webkit-text-stroke-color: black;
+
   }
 
   .heading {
@@ -28,8 +34,8 @@ const Container = styled.div`
     justify-content: center;
     align-items: center;
     margin-top: 80px;
-    
-    .header-text{
+
+    .header-text {
       font-size: 50px;
       margin-bottom: 20px;
     }
@@ -51,7 +57,7 @@ const Navbar = styled.div`
 `
 const SearchBox = styled.div`
 
-  width: 90%; /* width fit-content */
+  width:75%; /* width fit-content */
   position: relative; /* position relative to the parent */
   padding-right: 80px;
 `
@@ -99,11 +105,11 @@ const Links = styled.div`
   flex-direction: row;
   justify-content: flex-end;
   align-items: center;
-  padding: 0 30px;
+  padding: 0 25px;
   align-self: flex-end;
 
   .item {
-    margin: 0 20px;
+    margin: 0 10px;
 
   }
 
@@ -129,22 +135,43 @@ const Links = styled.div`
   }
 `
 
-function Header() {
+function Header(props) {
+    const [open, setOpen] = useState(false)
+    const handleDropdown = () => {
+        if (open) {
+            setOpen(false)
+        } else {
+            setOpen(true)
+        }
+    }
     return (<Container>
-
         <Navbar>
-            <div className="logo">BuidlNFT</div>
+            <div className="logo"><Link className={'whiteA'} to={'/'}> BuidlNFT</Link></div>
             <SearchBox>
                 <Button className="btn-search"><i className="fas fa-search "></i></Button>
                 <Input type="text" placeholder="Search here"/>
             </SearchBox>
             <Links>
-                <div className={'item'}>Explore
-                    <img src={arrow_down_url} alt="arrow-down.svg" height={'10'}/>
-                </div>
+                <Link className={'whiteA'} to={'/explore-nfts'}>
+                    <div className={'item'}>Explore
+                        <img src={arrow_down_url} alt="arrow-down.svg" height={'10'}/>
+                    </div>
+                </Link>
                 <div className={'item'}>Stats <img src={arrow_down_url} alt="arrow-down.svg" height={'10'}/></div>
-                <div className={'item'}>Create <img src={arrow_down_url} alt="arrow-down.svg" height={'10'}/></div>
+                <Link to={'/create-nft'} className={'whiteA'}>
+                    <div className={'item'}>Create <img src={arrow_down_url} alt="arrow-down.svg" height={'10'}/></div>
+                </Link>
                 <div className={'linear item'}>
+                    {props.profilePic ?
+                        <div style={{position: 'relative'}}>
+                            <DropDown open={open} items={[1, 2, 3, 4]}/>
+
+                            <img className={'circle'} src={props.profilePic} alt="profile"
+                                 height="80" width="80" onClick={() => {
+                                handleDropdown()
+                            }}/>
+                        </div>
+                        : ""}
                     <div className={'circle'}><img src={cart} alt="Trolly" height="80" width="80"/></div>
                     <div className={'circle'}><img src={night_mode} alt="moon" height="80" width="80"/></div>
                 </div>
@@ -152,13 +179,14 @@ function Header() {
         </Navbar>
         <div className={'heading'}>
             <div className={'header-text'}>
-                Connect Your Wallet
+                {props.pageTitle}
             </div>
             <div className={'sub-text'}>
-                Home / Connect your wallet
+                <Link className={'whiteA'} to={'/'}>Home</Link> / {props.linkTree}
             </div>
         </div>
-    </Container>);
+    </Container>)
+        ;
 }
 
 export default Header;

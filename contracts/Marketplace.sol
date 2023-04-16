@@ -39,7 +39,7 @@ contract Marketplace is ReentrancyGuard {
         address payable seller; // address of the seller
         address payable owner; // address of the owner
         uint256 price; // price of the token
-        bool sold; // if the token has been sold
+        //        bool sold; // if the token has been sold
     }
 
     // tokenId return which MarketToken -  fetch which one it is 
@@ -93,8 +93,8 @@ contract Marketplace is ReentrancyGuard {
             itemId, // unique id for each item
             nftContract, // address of the contract
             tokenId, // token id
-            payable(msg.sender), // address of the seller
-            payable(address(0)), // address of the owner
+            payable(msg.sender), // address of the seller - msg.sender is the address of the person who called the function
+            payable(address(0)), // address of the owner - no owner (address(0) = 0x0000000)
             price, // price of the token
             false // if the token has been sold
         );
@@ -109,8 +109,8 @@ contract Marketplace is ReentrancyGuard {
             tokenId, // token id
             msg.sender, // address of the seller
             address(0), // address of the owner
-            price, // price of the token
-            false  // if the token has been sold
+            price // price of the token
+        //            false  // if the token has been sold
         );
     }
     // function to conduct transactions and market sales 
@@ -129,7 +129,7 @@ contract Marketplace is ReentrancyGuard {
         // transfer the token from contract address to the buyer
         IERC721(nftContract).transferFrom(address(this), msg.sender, tokenId);
         idToMarketToken[itemId].owner = payable(msg.sender);
-        idToMarketToken[itemId].sold = true;
+        //        idToMarketToken[itemId].sold = true;
         _tokensSold.increment();
 
         payable(owner).transfer(listingPrice);

@@ -43,7 +43,7 @@ const Item = styled.button`
 
 function WalletAuthenticationPage(props) {
     return (<div>
-        <Header/>
+        <Header pageTitle={"Wallet Authentication"} linkTree={'Wallet Authentication'}/>
         <Container>
             <div className={'center'}>
                 <Item onClick={props.connect}>

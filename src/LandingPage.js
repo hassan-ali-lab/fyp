@@ -28,7 +28,7 @@ function LandingPage(props) {
         <NFTTrending/>
         <NFTCollectionExplore/>
         <FeaturedArtistsSection/>
-        <Footer/>
+        <Footer landingPage={true}/>
     </Container>);
 }
 

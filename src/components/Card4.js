@@ -1,5 +1,5 @@
 import styled from 'styled-components';
-const avitar1 = process.env.PUBLIC_URL + '/avatar1.svg';
+const avitar1 = process.env.PUBLIC_URL + '/avatar1.png';
 
 
 const Container = styled.div`
@@ -13,7 +13,7 @@ const Container = styled.div`
   padding: 20px 10px;
   margin: 10px;
   position: relative;
-  width: 23%;
+  width: 300px;
   height: 350px;
   border: 1px solid rgba(0, 0, 0, 0);
   border-radius: 10px;
