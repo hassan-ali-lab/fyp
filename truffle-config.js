@@ -56,6 +56,10 @@ module.exports = {
      *
      * $ truffle test --network <network-name>
      */
+    solidityLog: {
+        displayPrefix: 'log :', // defaults to ""
+        preventConsoleLogMigration: true, // defaults to false
+      },
 
     networks: {
         // Useful for testing. The `development` name is special - truffle uses it by default

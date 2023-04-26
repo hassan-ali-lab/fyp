@@ -11,7 +11,7 @@ import NFT from "./build/contracts/NFT.json";
 import Marketplace from "./build/contracts/Marketplace.json";
 import axios from "axios";
 // import pinata api
-import pinataSDK,{} from '@pinata/sdk';
+// import pinataSDK,{} from '@pinata/sdk';
 const profilePic = process.env.PUBLIC_URL + '/profile-images/profile.png';
 
 const customStyles = {

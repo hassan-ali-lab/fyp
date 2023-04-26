@@ -3,6 +3,9 @@ import WalletAuthenticationPage from "./WalletAuthenticationPage";
 import LandingPage from "./LandingPage";
 import {useMetaMask} from "metamask-react";
 import EditProfile from "./EditProfile";
+import C from "./Testing/C";
+import D from "./Testing/D";
+import E from "./Testing/E";
 
 
 function App() {
@@ -17,7 +20,7 @@ function App() {
         return <div>Connecting...</div>;
     } else if (status === "connected") {
         return <div>
-         <LandingPage />
+            <LandingPage/>
         </div>;
     } else {
         return <div>Unknown status Hello</div>;

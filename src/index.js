@@ -18,6 +18,7 @@ import MyCollection from "./MyCollection";
 import ExploreCollections from "./ExploreCollections";
 import NFTDetails from "./NFTDetails";
 import CollectionStats from "./CollectionStats";
+import C from "./Testing/C";
 
 
 const router = createBrowserRouter([
@@ -62,7 +63,7 @@ const router = createBrowserRouter([
     },
     {
         path: "/stats", element: <CollectionStats/>,
-    },
+    }
 ]);
 
 

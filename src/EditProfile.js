@@ -209,15 +209,7 @@ function EditProfile(props) {
         readAs: 'DataURL',
         accept: 'image/*',
         multiple: false,
-        // limitFilesConfig: {max: 1},
-        // // minFileSize: 0.1, // in megabytes
-        // maxFileSize: 2,
-        // imageSizeRestrictions: {
-        //     maxHeight: 400, // in pixels
-        //     maxWidth: 400,
-        //     minHeight: 50,
-        //     minWidth: 50,
-        // },
+      
     });
 
     const [profile, setProfile] = useState(profilePic)
