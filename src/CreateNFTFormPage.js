@@ -4,14 +4,8 @@ import Footer from "./components/Footer";
 import React, {useState} from "react";
 import {FileUploader} from "react-drag-drop-files";
 import Card from "./components/Card";
-import axios from "axios";
-import {PinataAPI_KEY, PinataAPI_SECRET} from "./Pinata";
-import Web3Modal from "web3modal";
-import {ethers} from "ethers";
-import {marketaddress, nftaddress} from "./config";
-import NFT from './build/contracts/NFT.json';
-import Marketplace from './build/contracts/Marketplace.json';
-import FileResizer from "react-image-file-resizer";
+import {sendFileToIPFS, createNFT} from "./Controller"
+import {useMetaMask} from "metamask-react";
 
 const eth = process.env.PUBLIC_URL + '/Eth.png';
 
@@ -53,6 +47,13 @@ const Column = styled.div`
     padding: 10px 0;
     font-weight: bold;
 
+    .active {
+      background-color: #FE3796;
+      color: white;
+      border-radius: 20px;
+      padding: 5px 10px;
+    }
+
     .input {
       width: 100%;
       height: 30px;
@@ -70,6 +71,7 @@ const Column = styled.div`
     //padding: 5px ;
     .col > .btn-strip {
       padding: 10px;
+
 
     }
 
@@ -132,105 +134,26 @@ const Button = styled.button`
   }
 `
 
-const fileTypes = ["JPG", "PNG"];
+const fileTypes = ["JPG", "PNG", "image/png", "image/jpeg"];
 
 function CreateNFTFormPage() {
+    const {status} = useMetaMask();
+    if (status === "notConnected") {
+        window.location.href = '/wallet-authentication';
+    }
     const [imageFile, setImageFile] = useState(null);
-    const [success, setSuccess] = useState(false);
+    // const [success, setSuccess] = useState(false);
     const [price, setPrice] = useState(0);
     const [title, setTitle] = useState(null);
     const [description, setDescription] = useState(null);
-    const fileReader = new FileReader();
-    fileReader.onloadend = (e) => {
-        setImageFile(e.target.result);
-        // console.log(e.target.result);
-    }
+    // const fileReader = new FileReader();
+    const [option, setOption] = useState('fixed price');
 
-    const sendFileToIPFS = async (e) => {
-
-        if (imageFile) {
-            try {
-                const formData = new FormData();
-                formData.append("file", imageFile);
-                const resFile = await axios({
-                    method: "post",
-                    url: "https://api.pinata.cloud/pinning/pinFileToIPFS",
-                    data: formData,
-                    headers: {
-                        'pinata_api_key': `${PinataAPI_KEY}`,
-                        'pinata_secret_api_key': `${PinataAPI_SECRET}`,
-                        "Content-Type": "multipart/form-data",
-                    },
-                    // axios metadata
-
-                    keyvalues: {
-                        "name": title,
-                        "description": description,
-                        "price": price
-                    }
-                })
-
-                console.log("resFile: ", resFile)
-
-                const ImgHash = resFile.data.IpfsHash; // This is the hash of the image
-                // console.log(ImgHash);
-                //Take a look at your Pinata Pinned section, you will see a new imageFile added to you list.
-                await createNFT('https://gateway.pinata.cloud/ipfs/' + ImgHash) // This is the URL of the image
-                return true;
-
-            } catch (error) {
-                if (error.response) {
-                    // The request was made and the server responded with a status code
-                    // that falls out of the range of 2xx
-                    console.log(error.response.data);
-                    console.log(error.response.status);
-                    console.log(error.response.headers);
-                } else if (error.request) {
-                    // The request was made but no response was received
-                    // `error.request` is an instance of XMLHttpRequest in the browser
-                    // and an instance of http.ClientRequest in node.js
-                    console.log(error.request);
-                } else {
-                    // Something happened in setting up the request that triggered an Error
-                    console.log('Error', error.message);
-                }
-                return false;
-            }
-        }
-    }
-
-
-    async function createNFT(url) {
-
-        // create the items and list them on the marketplace
-        const web3Modal = new Web3Modal()
-        const connection = await web3Modal.connect()
-        const provider = new ethers.providers.Web3Provider(connection)
-        const signer = provider.getSigner()
-
-        // we want to create the token
-        let contract = new ethers.Contract(nftaddress, NFT.abi, signer)
-        let transaction = await contract.mintToken(url)
-        let tx = await transaction.wait()
-        console.log(tx)
-        let event = tx.events[0]
-        let value = event.args[2]
-        let tokenId = value.toNumber()
-        const price_value = ethers.utils.parseUnits(price, 'ether') // this is the price of the item
-        // ethers.utils.parseUnits('1.0', 'ether') equals 1.0 ether which is 1000000000000000000 wei
-        // wei is the smallest unit of ether
-
-        // list the item for sale on the marketplace
-        // ethers is a library that helps us interact with the blockchain
-        contract = new ethers.Contract(marketaddress, Marketplace.abi, signer) // this is the marketplace contract
-        let listingPrice = await contract.getListingPrice() // this is the listing price
-        listingPrice = listingPrice.toString() // this is the listing price
-        console.log(listingPrice)
-        transaction = await contract.makeMarketItem(nftaddress, tokenId, price_value, {value: listingPrice}) // function in the marketplace contract
-        await transaction.wait()
-        console.log('Item created on the marketplace')
-
-    }
+    // fileReader.onloadend = (e) => {
+    //
+    //     setImageFile(e.target.result);
+    //     console.log(e.target.result)
+    // }
 
 
     const handleForm = (event) => {
@@ -240,35 +163,48 @@ function CreateNFTFormPage() {
             console.log('Please fill out all fields')
             return
         }
-        sendFileToIPFS().then(r => {
-                // redirect to home page
-                console.log(success)
-            }
-        ).catch(e => {
-            // console.log(e)
-            setSuccess(false)
-            // console.log(success)
-            setPrice(null)
-            setTitle(null)
-            setDescription(null)
-            setImageFile(null)
 
+        sendFileToIPFS(imageFile).then(url => {
+            switch (option) {
+                case 'fixed price':
+                    console.log(url, title, description, price)
+
+                    createNFT(url, title, description, price).then((v) => {
+                        console.log(v)
+                    }).catch(e => {
+                    })
+                    break;
+                case 'time auction':
+                    break;
+                case 'open for bids':
+                    break;
+                default:
+            }
+
+        }).catch(e => {
+            console.log(e)
         })
-        // window.location.href = '/'
     }
+
+
     return (<div>
         <Header pageTitle={"Create NFT Form"} linkTree={'create nft'}/>
         <Container onSubmit={handleForm}>
             <Column>
                 <div><h2>Preview Item</h2><p>Your NFT will look like this </p></div>
-                <Card imageFile={imageFile} title={title} description={description} price={price}/>
+                {imageFile ? <Card image={URL.createObjectURL(imageFile)} title={title} description={description}
+                                   price={price} alt={'preview'}/> : ""}
             </Column>
             <Column>
                 {/*change height of imageFile uploader*/}
                 <div><h2>Upload file</h2><p>Drag or choose your file to upload</p></div>
                 <Dropper>
                     <FileUploader
-                        handleChange={(file) => setImageFile(file)}
+                        handleChange={(file) => {
+                            console.log(file)
+                            // fileReader.readAsDataURL(file)
+                            setImageFile(file)
+                        }}
                         name="e"
                         types={fileTypes}
                         className={'file_uploader'}
@@ -276,14 +212,38 @@ function CreateNFTFormPage() {
                 </Dropper>
                 <h2>Select Method*</h2>
                 <div className={'btn-strip'}>
-                    <div className={''}>Fixed Rate</div>
-                    <div>Time Auction</div>
-                    <div>Open For Bid</div>
+                    <div id={'fixed-price '} className={'fixed-price active'} onClick={() => {
+                        document.getElementsByClassName('fixed-price')[0].classList.add('active');
+                        document.getElementsByClassName('time-auction')[0].classList.remove('active');
+                        document.getElementsByClassName('open-for-bids')[0].classList.remove('active');
+                        document.getElementsByClassName('option')[0].style.display = 'inherit';
+                        setOption('fixed price');
+                    }}>Fixed Rate
+                    </div>
+                    <div id={'time-auction'} className={'time-auction'} onClick={() => {
+                        document.getElementsByClassName('fixed-price')[0].classList.remove('active');
+                        document.getElementsByClassName('time-auction')[0].classList.add('active');
+                        document.getElementsByClassName('open-for-bids')[0].classList.remove('active');
+                        // display options are block,inline, inline-block,
+                        document.getElementsByClassName('option')[0].style.display = 'inherit';
+                        setOption('time auction');
+                    }}>Time Auction
+                    </div>
+                    <div id={'open-for-bids'} className={'open-for-bids'}
+                         onClick={() => {
+                             document.getElementsByClassName('fixed-price')[0].classList.remove('active');
+                             document.getElementsByClassName('time-auction')[0].classList.remove('active');
+                             document.getElementsByClassName('open-for-bids')[0].classList.add('active');
+                             // remove option element
+                             document.getElementsByClassName('option')[0].style.display = 'none';
+                             setOption('open for bids');
+                         }}
+                    >Open For Bid
+                    </div>
                 </div>
                 <div className={'btn-strip'}>
                     <label>Title*<br/>
                         <input className={'input'} type="text" name="title" placeholder={'e.g: Crypto Hunks '}
-                               required
                                onChange={e => {
                                    setTitle(e.target.value)
                                }}
@@ -291,33 +251,34 @@ function CreateNFTFormPage() {
                     </label>
                 </div>
                 <div className={'btn-strip'}>
-                    <label>External Link <br/>
-                        <input className={'input'} type="text" name="title"
-                               placeholder={'e.g: https://yoursite.io/item/123'}/>
-                    </label>
-                </div>
-                <div className={'btn-strip'}>
                     <label>Description <br/>
                         <input className={'input'} type="text" name="title"
                                placeholder={'e.g: This is a very limited item'}
-                               onChange={e =>
-                                   setDescription(e.target.value)
-                               }
+                               onChange={e => {
+                                   setDescription(e.target.value);
+                               }}
                         />
                     </label>
                 </div>
+                <div className={'btn-strip option'}>
+                    <label>{option}<br/>
+                        <input className={'input'} type="number" name="title"
+                               placeholder={'0'}
+                               onChange={e => {
+                                   setPrice(e.target.value)
+                               }}
 
+                        />
+                    </label>
+                </div>
                 <div className={'btn-strip-col'}>
                     <div className={'col'}>
-                        <div className={'btn-strip'}>
-                            <label>Fixed Price*<br/>
-                                <input className={'input'} type="text" name="title"
-                                       placeholder={'0'}
-                                       onChange={e => {
-                                           setPrice(e.target.value)
-                                       }}
 
-                                />
+
+                        <div className={'btn-strip'}>
+                            <label>External Link <br/>
+                                <input className={'input'} type="text" name="title"
+                                       placeholder={'e.g: https://yoursite.io/item/123'}/>
                             </label>
                         </div>
                         <div className={'btn-strip'}>

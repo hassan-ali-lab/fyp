@@ -2,6 +2,7 @@ import Header from "./components/Header";
 import Footer from "./components/Footer";
 import styled from 'styled-components';
 import React from "react";
+import {useMetaMask} from "metamask-react";
 
 const star = process.env.PUBLIC_URL + '/star.svg';
 
@@ -115,6 +116,10 @@ const profilePic = process.env.PUBLIC_URL + '/profile-images/profile.png';
 
 
 function WalletAuthenticationPage(props) {
+    const {status} = useMetaMask();
+    if (status === "notConnected") {
+        window.location.href = '/wallet-authentication';
+    }
     return (<div>
         <Header pageTitle={"Collection Stats"} linkTree={"Stats"} profilePic={profilePic}/>
 

@@ -10,6 +10,8 @@ import {marketaddress, nftaddress} from "./config";
 import NFT from "./build/contracts/NFT.json";
 import Marketplace from "./build/contracts/Marketplace.json";
 import axios from "axios";
+import {useMetaMask} from "metamask-react";
+import {getAllNFTs, getMyNFTs} from "./Controller";
 // import pinata api
 // import pinataSDK,{} from '@pinata/sdk';
 const profilePic = process.env.PUBLIC_URL + '/profile-images/profile.png';
@@ -73,118 +75,6 @@ const ContainerDiv = styled.div`
   justify-content: flex-start;
   align-items: center;
 `
-const Items = (props) => {
-    const [type, setType] = useState(props.type);
-    const [nfts, setNfts] = useState([]);
-    const [loading, setLoading] = useState(false);
-
-    // array of nfts
-
-    useEffect(() => {
-
-        loadNFTs().then(r => {
-        })
-    }, [])
-
-
-    async function loadNFTs() {
-
-        // what we want to load:
-        // we want to get the msg.sender hook up to the signer to display the owner nfts
-        console.log("1")
-
-        const web3Modal = new Web3Modal()
-        const connection = await web3Modal.connect()
-        const provider = new ethers.providers.Web3Provider(connection)
-        const signer = provider.getSigner()
-
-        const tokenContract = new ethers.Contract(nftaddress, NFT.abi, provider)
-        const marketContract = new ethers.Contract(marketaddress, Marketplace.abi, signer)
-        const data = await marketContract.fetchItemsCreated()
-        console.log(data)
-
-        const items = await Promise.all(data.map(async i => {
-            const tokenUri = await tokenContract.tokenURI(i.tokenId)
-            // we want get the token metadata - json
-            const meta = await axios.get(tokenUri)
-            let price = ethers.utils.formatUnits(i.price.toString(), 'ether')
-            let item = {
-                price,
-                tokenId: i.tokenId.toNumber(),
-                seller: i.seller,
-                owner: i.owner,
-                image: tokenUri,
-                name: i.name,
-                description: i.description
-            }
-            console.log(meta)
-            return item
-        }))
-
-        setNfts(items)
-        setLoading(true)
-    }
-
-    switch (props.type) {
-        case 'collected': {
-
-
-            break;
-        }
-        case 'created': {
-            return <ContainerDiv><Div>
-                {nfts.map((nft, i) => {
-                    let image = nft.image;
-                    const fileReader = new FileReader();
-                    const config = {responseType: 'blob'};
-
-                    axios.get(image, config).then(response => {
-                        image = new File([response.data], 'image.png');
-                    });
-                    // fileReader.readAsDataURL(imageFile);
-                    // fileReader.onload = () => {
-                    //     imageFile = fileReader.result;
-                    //
-                    // }
-                    return (
-                        <ChildDiv key={i}>
-                            <Card
-                                imageFile={image}
-                                title={nft.name}
-                                description={nft.description}
-                                price={nft.price}
-                                tokenId={nft.tokenId}
-                            />
-                        </ChildDiv>
-                    )
-                })}
-            </Div>
-                <PinkButton>Load More</PinkButton>
-            </ContainerDiv>
-
-            break;
-        }
-        case 'favorited': {
-
-
-            break;
-        }
-        case "activity": {
-
-
-            break;
-        }
-        case "inactive_listings": {
-
-
-            break;
-        }
-        default:
-            return <div>No Such Items</div>
-    }
-
-
-}
 
 const PinkButton = styled.button`
   background-color: #FE3796;
@@ -273,15 +163,29 @@ const RightDiv = styled.div`
   flex-direction: column;
 `
 
-function UserProfile(props) {
+function UserProfile({_name, _account}) {
+    const {status} = useMetaMask();
+    if (status === "notConnected") {
+        window.location.href = '/wallet-authentication';
+    }
+
+
     const [activeButton, setActiveButton] = useState("collected");
     const [name, setName] = useState("John Doe");
-    const [account, setAccount] = useState("0x13ccCb7B1b524c73486b7EC58dDA0Fa5A0763FAd")
-    const [modalIsOpen, setIsOpen] = React.useState(true);
+    const [account, setAccount] = useState("0x1f0314482a9ee9c20db30ff8a43cc5dcc8af83e2");
+    const [modalIsOpen, setIsOpen] = React.useState(false);
+    const [content, setContent] = useState([]);
 
-    function openModal() {
-        setIsOpen(true);
+    if (name === undefined) {
+        setName("John Doe");
     }
+    if (account === undefined) {
+        setAccount("0x1f0314482a9ee9c20db30ff8a43cc5dcc8af83e2");
+    }
+
+    /*  function openModal() {
+          setIsOpen(true);
+      }*/
 
     function afterOpenModal() {
         // references are now sync'd and can be accessed.
@@ -290,6 +194,119 @@ function UserProfile(props) {
 
     function closeModal() {
         setIsOpen(false);
+    }
+
+    useEffect(() => {
+        let promise = getMyNFTs()
+        console.log(promise)
+        promise.then((data) => {
+            setContent(data)
+        })
+    }, [activeButton])
+
+    const Items = ({content}) => {
+        console.log(content)
+
+        return (<ContainerDiv>
+            <Div>
+                {content.map((item, index) => {
+                    return <ChildDiv key={item.itemId}><Card key={index} {...item}/></ChildDiv>
+                })}
+            </Div>
+            <PinkButton>Load More</PinkButton>
+        </ContainerDiv>)
+
+        //
+        // async function loadNFTs() {
+        //
+        //     const web3Modal = new Web3Modal()
+        //     const connection = await web3Modal.connect()
+        //     const provider = new ethers.providers.Web3Provider(connection)
+        //     const signer = provider.getSigner()
+        //
+        //     const tokenContract = new ethers.Contract(nftaddress, NFT.abi, provider)
+        //     const marketContract = new ethers.Contract(marketaddress, Marketplace.abi, signer)
+        //     const data = await marketContract.getMyNFTs()
+        //     console.log(data)
+        //
+        //     const items = await Promise.all(data.map(async i => {
+        //         const tokenUri = await tokenContract.tokenURI(i.tokenId)
+        //         // we want get the token metadata - json
+        //         const meta = await axios.get(tokenUri)
+        //         let price = ethers.utils.formatUnits(i.price.toString(), 'ether')
+        //         let item = {
+        //             price,
+        //             tokenId: i.tokenId.toNumber(),
+        //             seller: i.seller,
+        //             owner: i.owner,
+        //             image: tokenUri,
+        //             name: i.name,
+        //             description: i.description
+        //         }
+        //         console.log(meta)
+        //         return item
+        //     }))
+        //
+        //     setNfts(items)
+        //     // setLoading(true)
+        // }
+        //
+        // switch (props.type) {
+        //     case 'collected': {
+        //         break;
+        //     }
+        //     case 'created': {
+        //         return <ContainerDiv><Div>
+        //             {nfts.map((nft, i) => {
+        //                 let image = nft.image;
+        //                 // const fileReader = new FileReader();
+        //                 const config = {responseType: 'blob'};
+        //
+        //                 axios.get(image, config).then(response => {
+        //                     image = new File([response.data], 'image.png');
+        //                 });
+        //                 // fileReader.readAsDataURL(imageFile);
+        //                 // fileReader.onload = () => {
+        //                 //     imageFile = fileReader.result;
+        //                 //
+        //                 // }
+        //                 return (
+        //                     <ChildDiv key={i}>
+        //                         <Card
+        //                             imageFile={image}
+        //                             title={nft.name}
+        //                             description={nft.description}
+        //                             price={nft.price}
+        //                             tokenId={nft.tokenId}
+        //                         />
+        //                     </ChildDiv>
+        //                 )
+        //             })}
+        //         </Div>
+        //             <PinkButton>Load More</PinkButton>
+        //         </ContainerDiv>
+        //
+        //     }
+        //     case 'favorited': {
+        //
+        //
+        //         break;
+        //     }
+        //     case "activity": {
+        //
+        //
+        //         break;
+        //     }
+        //     case "inactive_listings": {
+        //
+        //
+        //         break;
+        //     }
+        //     default:
+        //         return <div>No Such Items</div>
+        // }
+
+
     }
 
 
@@ -341,7 +358,7 @@ function UserProfile(props) {
                         }
                     }>Inactive Listing</Button>
                 </ButtonStrip>
-                {<Items type={activeButton}/>}
+                {<Items content={content} type={activeButton}/>}
 
             </RightDiv>
 

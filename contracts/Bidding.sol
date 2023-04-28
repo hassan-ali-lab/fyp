@@ -3,7 +3,7 @@ pragma solidity ^0.8.0;
 
 import '@openzeppelin/contracts/utils/Counters.sol';
 import '@openzeppelin/contracts/security/ReentrancyGuard.sol';
-import 'truffle/Console.sol';
+import 'truffle/console.sol';
 
 contract Bidding is ReentrancyGuard {
     using Counters for Counters.Counter;
@@ -14,6 +14,8 @@ contract Bidding is ReentrancyGuard {
     struct BidToken {
         uint itemId;
         uint256 tokenId;
+        string name;
+        string description;
         address payable auctionStarter;
         address payable highestBidder;
         uint256 highestBid;
@@ -29,6 +31,45 @@ contract Bidding is ReentrancyGuard {
     constructor(){
         owner = payable(msg.sender);
     }
+
+    function makeBidItem(
+        uint tokenId,
+        string memory name,
+        string memory description
+    )
+    public payable nonReentrant {
+        // nonReentrant is a modifier to prevent reentry attack
+
+        //        require(price > 0, 'Price must be at least one wei');
+        //        require(msg.value == listingPrice, 'Price must be equal to listing price');
+
+        _bidItemIds.increment();
+        uint itemId = _bidItemIds.current();
+
+        idToBidToken[itemId] = BidToken(
+            itemId,
+            tokenId,
+            name,
+            description,
+            payable(msg.sender),
+            payable(address(0)),
+            0,
+            false,
+            false
+        );
+
+        console.log("Bid Token created");
+        console.log("Item ID: %s", itemId);
+        console.log("Token ID: %s", tokenId);
+        console.log("Name: %s", name);
+        console.log("Description: %s", description);
+        console.log("Auction Starter: %s", msg.sender);
+        console.log("Highest Bidder: %s", address(0));
+        console.log("Highest Bid: %s", 0);
+        console.log("Closed: %s", false);
+
+    }
+
 
     function placeBid(uint itemId) public payable {
         require(msg.value > idToBidToken[itemId].highestBid, "Bid must be higher than current highest bid.");
@@ -68,40 +109,11 @@ contract Bidding is ReentrancyGuard {
 
         // Transfer the funds to the owner
         idToBidToken[tokenID].auctionStarter.transfer(idToBidToken[tokenID].highestBid);
-    }
 
-    function makeBidItem(
-        uint tokenId
-    )
-    public payable nonReentrant {
-        // nonReentrant is a modifier to prevent reentry attack
-
-        //        require(price > 0, 'Price must be at least one wei');
-        //        require(msg.value == listingPrice, 'Price must be equal to listing price');
-
-        _bidItemIds.increment();
-        uint itemId = _bidItemIds.current();
-
-        idToBidToken[itemId] = BidToken(
-            itemId,
-            tokenId,
-            payable(msg.sender),
-            payable(address(0)),
-            0,
-            false,
-            false
-        );
-
-        console.log("Bid Token created");
-        console.log("Item ID: %s", itemId);
-        console.log("Auction Starter: %s", msg.sender);
-        console.log("Highest Bidder: %s", address(0));
-        console.log("Highest Bid: %s", 0);
-        console.log("Closed: %s", false);
+        // list Items
 
     }
 
-    // list Items
     function listBidItems() public view returns (BidToken[] memory) {
         uint itemCount = _bidItemIds.current();
         uint unsoldItemCount = _bidItemIds.current();

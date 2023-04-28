@@ -5,33 +5,12 @@ import "@openzeppelin/contracts/token/ERC721/ERC721.sol"; // import ERC721
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol"; // import ReentrancyGuard
 import "@openzeppelin/contracts/utils/Counters.sol"; // import Counters
 import "truffle/console.sol";
-
-/****************************************************************************************
- * @title Marketplace
- * @dev Implements the functionality of a marketplace for NFTs
- ****************************************************************************************
-    * @dev The marketplace contract is the contract that allows users to list their NFTs for sale
-    * @dev The marketplace contract is the contract that allows users to buy NFTs
-
-Marketplace
-*
-    getListingPrice() - get the listing price
-    createMarketItem() - create a market item to put it up for sale
-    createMarketSale() - create a market sale for buying and selling between parties
-    fetchMarketItems() - fetch all the market items
-    fetchMyNFTs() - fetch all the NFTs that a user has listed for sale
-    fetchItemsCreated() - fetch all the NFTs that a user has created
-    changeListingPrice() - change the listing price
-    changeOwner() - change the owner of the contract
-    withdraw() - withdraw the funds from the contract
-    getBalance() - get the balance of the contract
-    getOwner() - get the owner of the contract
-    getMarketItem() - get the market item
-    getMarketItems() - get the market items
-    getMarketItemsCreated() - get the market items created
-    getMarketItemsForSale() - get the market items for sale
-
-*/
+// getListingPrice
+// createMarketItem
+// createMarketSale
+// fetchMarketItems
+// fetchMyNFTs
+// fetchItemsCreated
 
 contract Marketplace is ReentrancyGuard {
     using Counters for Counters.Counter; //  use the counter library - use the counter for the token id
@@ -74,8 +53,6 @@ contract Marketplace is ReentrancyGuard {
     // tokenId return which MarketToken -  fetch which one it is
 
     mapping(uint256 => MarketToken) private idToMarketToken; // private - only accessible in this contract
-    mapping(address => MarketToken[]) private addressToTokens; // private - only accessible in this contract
-    mapping(address => uint) private addressToCount; // private - only accessible in this contract
 
     // listen to events from front end applications
     event MarketTokenMinted(
@@ -111,9 +88,6 @@ contract Marketplace is ReentrancyGuard {
         return count;
     }
 
-    function countMarketItemsCreated() public view returns (uint256) {
-        return addressToCount[msg.sender];
-    }
 
     function createMarketItem(
         address nftContract, // address of the contract
@@ -133,31 +107,17 @@ contract Marketplace is ReentrancyGuard {
             msg.value == listingPrice,
             "Price must be equal to listing price"
         );
-        console.log("Create Market Item - msg.sender: %s", msg.sender);
-        console.log("Create Market Item - price: %s", price);
-        console.log("Create Market Item - listingPrice: %s", listingPrice);
         // increment the token id
         _tokenIds.increment();
-      
 
         console.log("Create Market Item - _tokenIds: %s", _tokenIds._value);
         // get the current token id
         uint itemId = _tokenIds._value;
-        
+
         console.log("Create Market Item - itemId: %s", itemId);
-        uint count = addressToCount[msg.sender]; // get the current count
-        // addressToCount[msg.sender].current(); // get the current count
-        // addressToCount[msg.sender].increment(); // increment the count
-    
-        console.log("count: %s", count);
+
         console.log("_tokenIds count: %s", _tokenIds._value);
 
-        
-        // increment the count
-        console.log("Create Market Item - count: %s", count);
-        console.log("Create Market Item - addressToCount[msg.sender]: %s", addressToCount[msg.sender]);
-        // addressToCount[msg.sender] = addressToCount[msg.sender] + 1;
-        // default value is 0
 
         //putting it up for sale - bool - no owner
         idToMarketToken[itemId] = MarketToken(
@@ -172,24 +132,21 @@ contract Marketplace is ReentrancyGuard {
             forSale // is the token for sale
         );
 
-        addressToTokens[msg.sender].push(idToMarketToken[itemId]);
-        // payable - can receive ether
-        // msg.sender is the address of the person who deployed the contract
-        // payable(msg.sender) - convert the address to a payable address
         console.log("Object");
-        console.log( idToMarketToken[itemId].itemId);
-        console.log( idToMarketToken[itemId].nftContract);
-        console.log( idToMarketToken[itemId].tokenId);
-        console.log( idToMarketToken[itemId].name); //a
-        console.log( idToMarketToken[itemId].description);//b
-        console.log( idToMarketToken[itemId].creator);
-        console.log( idToMarketToken[itemId]._owner);
+        console.log(idToMarketToken[itemId].itemId);
+        console.log(idToMarketToken[itemId].nftContract);
+        console.log(idToMarketToken[itemId].tokenId);
+        console.log(idToMarketToken[itemId].name);
+        //a
+        console.log(idToMarketToken[itemId].description);
+        //b
+        console.log(idToMarketToken[itemId].creator);
+        console.log(idToMarketToken[itemId]._owner);
         console.log(idToMarketToken[itemId].price);
         console.log(idToMarketToken[itemId].forSale);
         // NFT transaction - transfer the token from the seller to the contract
         IERC721(nftContract).transferFrom(msg.sender, address(this), tokenId);
-        
-        addressToCount[msg.sender]++;
+
         // emit the event
         emit MarketTokenMinted(
             itemId, // unique id for each item
@@ -222,18 +179,29 @@ contract Marketplace is ReentrancyGuard {
         payable(owner).transfer(listingPrice);
     }
 
-       function getMyNFTs() public view returns (MarketToken[] memory) {
-           
-           MarketToken[] memory result = new MarketToken[](addressToCount[msg.sender]);
-          
-    
-           for (uint256 i = 0; i <= addressToCount[msg.sender]; i++) {
-            
-                   result[i] = addressToTokens[msg.sender][i];
-           }
-    
-           return result;
-}
+    function getMyNFTs() public view returns (MarketToken[] memory) {
+
+        uint totalItemCount = _tokenIds.current();
+        uint itemCount = 0;
+
+        for (uint i = 0; i < totalItemCount; i++) {
+            if (idToMarketToken[i + 1]._owner == msg.sender) {
+                itemCount += 1;
+            }
+        }
+
+        uint currentIndex = 0;
+        MarketToken[] memory items = new MarketToken[](itemCount);
+        for (uint i = 0; i < totalItemCount; i++) {
+            if (idToMarketToken[i + 1]._owner == msg.sender) {
+                uint currentId = idToMarketToken[i + 1].itemId;
+                MarketToken storage currentItem = idToMarketToken[currentId];
+                items[currentIndex] = currentItem;
+                currentIndex += 1;
+            }
+        }
+        return items;
+    }
 
     // getOneItem
     function getOneItem(
@@ -255,12 +223,11 @@ contract Marketplace is ReentrancyGuard {
         // loop through the total item count
         for (uint i = 0; i < totalItemCount; i++) {
             // current item
-            MarketToken storage currentItem =  idToMarketToken[i];
-
-            console.log("id");
+            MarketToken storage currentItem = idToMarketToken[i + 1];
             // current index
             items[i] = currentItem;
         }
+
         // return the items - array of minted nfts
         return items;
     }

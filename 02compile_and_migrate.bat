@@ -1,4 +1,4 @@
+del -r src/build
 truffle compile
 truffle migrate --reset
-del -r ./src/build
-mv -f ./build ./src/build
+mv build src/build

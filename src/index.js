@@ -7,8 +7,6 @@ import CreateNFTFormPage from './CreateNFTFormPage';
 import EditProfile from './EditProfile';
 import CreateNFTPage from "./CreateNFTPage";
 import UserProfile from "./UserProfile";
-import Modal from 'react-modal';
-import Modal1 from "./Modals/Modal1";
 import ExploreNFTs from "./ExploreNFTs";
 import CreatorProfile from "./CreatorProfile";
 import Activity from "./Activity";
@@ -18,12 +16,15 @@ import MyCollection from "./MyCollection";
 import ExploreCollections from "./ExploreCollections";
 import NFTDetails from "./NFTDetails";
 import CollectionStats from "./CollectionStats";
-import C from "./Testing/C";
+import WalletAuthenticationPage from "./WalletAuthenticationPage";
 
 
 const router = createBrowserRouter([
     {
         path: "/", element: (<App/>)
+    },
+    {
+        path: "/authentication", element: <WalletAuthenticationPage/>,
     },
     {
         path: "/create-nft", element: <CreateNFTPage/>,

@@ -4,23 +4,17 @@ import styled from "styled-components";
 import React, {useEffect, useState} from "react";
 import Card from "./components/Card";
 import Modal1 from "./Modals/Modal1";
+import {getAllNFTs} from "./Controller";
+import {ethers} from "ethers";
+import {useMetaMask} from "metamask-react";
 
 const profilePic = process.env.PUBLIC_URL + '/profile-images/profile.png';
 const downarrow = process.env.PUBLIC_URL + '/arrow-down.svg';
 
 const customStyles = {
     content: {
-        top: '50%',
-        left: '50%',
-        right: 'auto',
-        bottom: 'auto',
-        marginRight: '-50%',
-        transform: 'translate(-50%, -50%)',
-        // backgroundColor: 'rgba(0,0,0,0.5)'
-        border: '1px solid white',
-        borderRadius: '40px',
-        height: '400px',
-        padding: '0px',
+        top: '50%', left: '50%', right: 'auto', bottom: 'auto', marginRight: '-50%', transform: 'translate(-50%, -50%)', // backgroundColor: 'rgba(0,0,0,0.5)'
+        border: '1px solid white', borderRadius: '40px', height: '400px', padding: '0px',
     },
 };
 
@@ -52,13 +46,17 @@ const Div = styled.div`
   flex-wrap: wrap;
   justify-content: flex-start;
   align-items: flex-start;
+  flex: 1 1 30%; /* 1 is the flex-grow, 0 is the flex-shrink, and 30% is the flex-basis */
+  
 `
 const ChildDiv = styled.div`
-
-  flex: 1 1 30%; /* 1 is the flex-grow, 0 is the flex-shrink, and 30% is the flex-basis */
+  //width: 100%;
   //margin: 30px;/
   padding: 30px;
+  
+
   //float:left;
+
 `
 
 const ContainerDiv = styled.div`
@@ -66,24 +64,22 @@ const ContainerDiv = styled.div`
   flex-direction: column;
   justify-content: flex-start;
   align-items: center;
+  min-height: 300vh;
 `
-const Items = (cards) => {
-    return <ContainerDiv><Div>
-        <ChildDiv> <Card/></ChildDiv>
-        <ChildDiv> <Card/></ChildDiv>
-        <ChildDiv> <Card/></ChildDiv>
+const Items = ({content}) => {
 
-        <ChildDiv> <Card/></ChildDiv>
-        <ChildDiv> <Card/></ChildDiv>
-        <ChildDiv> <Card/></ChildDiv>
-
-        <ChildDiv> <Card/></ChildDiv>
-        <ChildDiv> <Card/></ChildDiv>
-        <ChildDiv> <Card/></ChildDiv>
-    </Div>
+    return (<ContainerDiv>
+        <Div>
+            {content.map((item, index) => {
+                return <ChildDiv key={item.itemId}><Card key={index} {...item}/></ChildDiv>
+            })}
+        </Div>
         <PinkButton>Load More</PinkButton>
-    </ContainerDiv>
+    </ContainerDiv>)
+
+
 }
+
 
 const PinkButton = styled.button`
   background-color: #FE3796;
@@ -245,10 +241,16 @@ const RightDiv = styled.div`
 `
 
 function UserProfile(props) {
+    const {status} = useMetaMask();
+    if (status === "notConnected") {
+        window.location.href = '/wallet-authentication';
+    }
     const [activeButton, setActiveButton] = useState("all");
     const [name, setName] = useState("John Doe");
     const [account, setAccount] = useState("0x13ccCb7B1b524c73486b7EC58dDA0Fa5A0763FAd")
     const [modalIsOpen, setIsOpen] = React.useState(false);
+    const [content, setContent] = useState([])
+
     const buttons = {
         'all': document.getElementById('all'),
         'sports': document.getElementById('sports'),
@@ -276,8 +278,14 @@ function UserProfile(props) {
                 }
             }
         }
-    })
 
+    })
+    useEffect(() => {
+        let promise = getAllNFTs()
+        promise.then((data) => {
+            setContent(data)
+        })
+    }, [activeButton])
 
     function openModal() {
         setIsOpen(true);
@@ -292,10 +300,15 @@ function UserProfile(props) {
         setIsOpen(false);
     }
 
+
     const switchCase = (value) => {
+
         switch (value) {
             case 'all':
-                return <Items/>;
+                return <Items content={content}/>;
+
+
+            // return <Items/>;
             case 'sports':
                 return <Items/>;
             case 'music':
@@ -311,170 +324,153 @@ function UserProfile(props) {
             case 'photography':
                 return <Items/>;
         }
+
+
     }
-    const [value, setValue] = useState(true);
 
     return (<div>
-            <Header pageTitle={"Explore NFTs"} linkTree={"explore"} profilePic={profilePic}/>
-            <Modal1
-                isOpen={modalIsOpen}
-                onAfterOpen={afterOpenModal}
-                onRequestClose={closeModal}
-                style={customStyles}
-            />
-            <Container>
-                <LeftDiv>
-                    <div className={'title-bar'}>
-                        <h3>Filters</h3>
-                        <div>Reset</div>
+        <Header pageTitle={"Explore NFTs"} linkTree={"explore"} profilePic={profilePic}/>
+        <Modal1
+            isOpen={modalIsOpen}
+            onAfterOpen={afterOpenModal}
+            onRequestClose={closeModal}
+            style={customStyles}
+        />
+        <Container>
+            <LeftDiv>
+                <div className={'title-bar'}>
+                    <h3>Filters</h3>
+                    <div>Reset</div>
+                </div>
+                <CardDiv>
+                    <div className={'row'}>
+                        <div>Status</div>
+                        <div><img src={downarrow} alt=""/></div>
                     </div>
-                    <CardDiv>
-                        <div className={'row'}>
-                            <div>Status</div>
-                            <div><img src={downarrow} alt=""/></div>
+                    <div className={'body-row'}>
+                        <div>Buy Now</div>
+                        <div>On Auction</div>
+                        <div>New</div>
+                        <div>Has Offers</div>
+                        <div>All</div>
+                    </div>
+                </CardDiv>
+                <CardDiv>
+                    <div className={'row'}>
+                        <div>Chains</div>
+                        <div><img src={downarrow} alt=""/></div>
+                    </div>
+                    <div className={'body-col'}>
+                        <div className={'rec'}>
+                            <div><label><input type="checkbox" onChange={(event) => {
+                                console.log(event.target.checked)
+                            }}/> Ethereum
+                            </label>
+                            </div>
+                            <div>116</div>
                         </div>
-                        <div className={'body-row'}>
-                            <div>Buy Now</div>
-                            <div>On Auction</div>
-                            <div>New</div>
-                            <div>Has Offers</div>
-                            <div>All</div>
+                        <div className={'rec'}>
+                            <div><label><input type="checkbox" onChange={(event) => {
+                                console.log(event.target.checked)
+                            }}/> Polygon
+                            </label>
+                            </div>
+                            <div>116</div>
                         </div>
-                    </CardDiv>
-                    <CardDiv>
-                        <div className={'row'}>
-                            <div>Chains</div>
-                            <div><img src={downarrow} alt=""/></div>
-                        </div>
-                        <div className={'body-col'}>
-                            <div className={'rec'}>
-                                <div><label><input type="checkbox" onChange={(event) => {
+                        <div className={'rec'}>
+                            <div><label>
+                                <input type="checkbox" onChange={(event) => {
                                     console.log(event.target.checked)
-                                }}/> Ethereum
-                                </label>
-                                </div>
-                                <div>116</div>
+                                }}/> Avalanche
+                            </label>
                             </div>
-                            <div className={'rec'}>
-                                <div><label><input type="checkbox" onChange={(event) => {
-                                    console.log(event.target.checked)
-                                }}/> Polygon
-                                </label>
-                                </div>
-                                <div>116</div>
-                            </div>
-                            <div className={'rec'}>
-                                <div><label>
-                                    <input type="checkbox" onChange={(event) => {
-                                        console.log(event.target.checked)
-                                    }}/> Avalanche
-                                </label>
-                                </div>
-                                <div>116</div>
-                            </div>
-                            <div className={'rec'}>
-                                <div><label><input type="checkbox" onChange={(event) => {
-                                    console.log(event.target.checked)
-                                }}/> Solana
-                                </label>
-                                </div>
-                                <div>116</div>
-                            </div>
-                            <div className={'rec'}>
-                                <div><label><input type="checkbox" onChange={(event) => {
-                                    console.log(event.target.checked)
-                                }}/> Optimism
-                                </label>
-                                </div>
-                                <div className={'label'}>116</div>
-                            </div>
+                            <div>116</div>
                         </div>
-                    </CardDiv>
-                    <CardDiv>
-                        <div className={'row'}>
-                            <div>Price</div>
-                            <div><img src={downarrow} alt=""/></div>
-                        </div>
-                        <div className={'body-row'}>
-
-
-                            <div className="slidecontainer">
-                                <p>Custom range slider:</p>
-                                <input type="range" min="1" max="100" className="slider" id="myRange" onChange={
-                                    (event) => {
-                                        console.log(event.target.value)
-                                    }
-                                }/>
+                        <div className={'rec'}>
+                            <div><label><input type="checkbox" onChange={(event) => {
+                                console.log(event.target.checked)
+                            }}/> Solana
+                            </label>
                             </div>
+                            <div>116</div>
                         </div>
-                    </CardDiv>
-                    <CardDiv>
-                        <div className={'row'}>
-                            <div>Currency</div>
-                            <div><img src={downarrow} alt=""/></div>
+                        <div className={'rec'}>
+                            <div><label><input type="checkbox" onChange={(event) => {
+                                console.log(event.target.checked)
+                            }}/> Optimism
+                            </label>
+                            </div>
+                            <div className={'label'}>116</div>
                         </div>
+                    </div>
+                </CardDiv>
+                <CardDiv>
+                    <div className={'row'}>
+                        <div>Price</div>
+                        <div><img src={downarrow} alt=""/></div>
+                    </div>
+                    <div className={'body-row'}>
 
-                    </CardDiv>
-                    <CardDiv>
-                        <div className={'row'}>
-                            <div>Quantity</div>
-                            <div><img src={downarrow} alt=""/></div>
+
+                        <div className="slidecontainer">
+                            <p>Custom range slider:</p>
+                            <input type="range" min="1" max="100" className="slider" id="myRange"
+                                   onChange={(event) => {
+                                       console.log(event.target.value)
+                                   }}/>
                         </div>
+                    </div>
+                </CardDiv>
+                <CardDiv>
+                    <div className={'row'}>
+                        <div>Currency</div>
+                        <div><img src={downarrow} alt=""/></div>
+                    </div>
 
-                    </CardDiv>
-                </LeftDiv>
-                <RightDiv>
-                    <ButtonStrip>
-                        <Button id={'all'} onClick={
-                            () => {
-                                setActiveButton("all")
-                            }
-                        }>All NFT</Button>
-                        <Button id={'sports'} onClick={
-                            () => {
-                                setActiveButton("sports")
-                            }
-                        }>Sports</Button>
-                        <Button id={'music'} onClick={
-                            () => {
-                                setActiveButton("music")
-                            }
-                        }>Music</Button>
-                        <Button id={'arts'} onClick={
-                            () => {
-                                setActiveButton("arts")
-                            }
-                        }>Arts</Button>
-                        <Button id={'collectibles'} onClick={
-                            () => {
-                                setActiveButton("collectibles")
-                            }
-                        }>Collectibles</Button>
-                        <Button id={'trending_cards'} onClick={
-                            () => {
-                                setActiveButton("trending_cards")
-                            }
-                        }>Trending Cards</Button>
-                        <Button id={'utilities'} onClick={
-                            () => {
-                                setActiveButton("utilities")
-                            }
-                        }>Utilities</Button>
-                        <Button id={'photography'} onClick={
-                            () => {
-                                setActiveButton("photography")
-                            }
-                        }>Photography</Button>
-                    </ButtonStrip>
-                    {switchCase(activeButton)}
+                </CardDiv>
+                <CardDiv>
+                    <div className={'row'}>
+                        <div>Quantity</div>
+                        <div><img src={downarrow} alt=""/></div>
+                    </div>
 
-                </RightDiv>
+                </CardDiv>
+            </LeftDiv>
+            <RightDiv>
+                <ButtonStrip>
+                    <Button id={'all'} onClick={() => {
+                        setActiveButton("all")
+                    }}>All NFT</Button>
+                    <Button id={'sports'} onClick={() => {
+                        setActiveButton("sports")
+                    }}>Sports</Button>
+                    <Button id={'music'} onClick={() => {
+                        setActiveButton("music")
+                    }}>Music</Button>
+                    <Button id={'arts'} onClick={() => {
+                        setActiveButton("arts")
+                    }}>Arts</Button>
+                    <Button id={'collectibles'} onClick={() => {
+                        setActiveButton("collectibles")
+                    }}>Collectibles</Button>
+                    <Button id={'trending_cards'} onClick={() => {
+                        setActiveButton("trending_cards")
+                    }}>Trending Cards</Button>
+                    <Button id={'utilities'} onClick={() => {
+                        setActiveButton("utilities")
+                    }}>Utilities</Button>
+                    <Button id={'photography'} onClick={() => {
+                        setActiveButton("photography")
+                    }}>Photography</Button>
+                </ButtonStrip>
+                {switchCase(activeButton)}
+
+            </RightDiv>
 
 
-            </Container>
-            <Footer/>
-        </div>
-    )
+        </Container>
+        <Footer/>
+    </div>)
 }
 
 export default UserProfile;

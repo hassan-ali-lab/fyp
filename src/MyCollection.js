@@ -4,6 +4,7 @@ import styled from "styled-components";
 import React, {useEffect, useState} from "react";
 
 import Modal1 from "./Modals/Modal1";
+import {useMetaMask} from "metamask-react";
 
 const profilePic = process.env.PUBLIC_URL + '/profile-images/profile.png';
 const downarrow = process.env.PUBLIC_URL + '/arrow-down.svg';
@@ -236,6 +237,8 @@ const Button = styled.button`
   }
 
 `
+const Items = styled.div`
+`;
 
 const LeftDiv = styled.div`
   width: 25%;
@@ -333,7 +336,11 @@ const RightDiv = styled.div`
   flex-direction: column;
 `
 
-function UserProfile(props) {
+function MyCollection(props) {
+    const {status} = useMetaMask();
+    if (status === "notConnected") {
+        window.location.href = '/wallet-authentication';
+    }
     const [activeButton, setActiveButton] = useState("all");
     const [name, setName] = useState("John Doe");
     const [account, setAccount] = useState("0x13ccCb7B1b524c73486b7EC58dDA0Fa5A0763FAd")
@@ -448,4 +455,4 @@ function UserProfile(props) {
     )
 }
 
-export default UserProfile;
+export default MyCollection;

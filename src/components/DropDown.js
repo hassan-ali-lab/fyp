@@ -1,5 +1,4 @@
 import styled, {css} from "styled-components";
-import {Link} from "react-router-dom";
 import Button from "./Button";
 
 const icon = process.env.PUBLIC_URL + '/dropdown_manu_images/icon.png';
@@ -100,11 +99,14 @@ function DropDown({open, items}) {
 
         <div className={'header'}>
             <div className={'blackA'}>Notification</div>
-            <Button primary to={'/notifications'} name={'See All'}/></div>
+            <Button primary to={'/notifications'} name={'View Profile'} onClick={(a) => {
+                window.location.href = '/user-profile';
+            }
+            }/></div>
         <ul className={'items'}>
             {
                 items.map((menuItem, index) => (
-                    <li key={menuItem} className="menu-item">
+                    <li key={index} className="menu-item">
                         <img className={'image'} src={icon} alt=""/>
                         <div className={'data'}>
                             <h3>Eth Received</h3>
@@ -114,7 +116,7 @@ function DropDown({open, items}) {
                         <div className={'circle'}></div>
                     </li>
                 ))}
-            
+
         </ul>
 
     </Container>

@@ -11,6 +11,7 @@ import {ethers} from "ethers";
 import {marketaddress, nftaddress} from "./config";
 import NFT from './build/contracts/NFT.json';
 import Marketplace from './build/contracts/Marketplace.json';
+import {useMetaMask} from "metamask-react";
 
 const eth = process.env.PUBLIC_URL + '/Eth.png';
 
@@ -134,6 +135,10 @@ const Button = styled.button`
 const fileTypes = ["JPG", "PNG"];
 
 function CreateNFTFormPage() {
+    const {status} = useMetaMask();
+    if (status === "notConnected") {
+        window.location.href = '/wallet-authentication';
+    }
     const [file, setFile] = useState(null);
     const [success, setSuccess] = useState(null);
     const [formInput, updateFormInput] = useState({price: '', name: '', description: ''})

@@ -1,6 +1,9 @@
 import Header from "./components/Header";
 import Footer from "./components/Footer";
 import styled from 'styled-components';
+import {useMetaMask} from "metamask-react";
+import LandingPage from "./LandingPage";
+import React from "react";
 
 const metamask = process.env.PUBLIC_URL + '/WalletAuthentication/MetaMask_Fox.png';
 const coinbase = process.env.PUBLIC_URL + '/WalletAuthentication/CoinBase.png';
@@ -42,34 +45,56 @@ const Item = styled.button`
 `
 
 function WalletAuthenticationPage(props) {
-    return (<div>
-        <Header pageTitle={"Wallet Authentication"} linkTree={'Wallet Authentication'}/>
-        <Container>
-            <div className={'center'}>
-                <Item onClick={props.connect}>
-                    <img className={'image'} src={metamask} alt="metamask"/>
-                    <div>Metamask</div>
-                </Item>
-                <Item>
-                    <img className={'image'} src={phantom} alt="phantom"/>
-                    <div>Phantom</div>
-                </Item>
-                <Item>
-                    <img className={'image'} src={trust_wallet} alt="trustwallet"/>
-                    <div>Trust Wallet</div>
-                </Item>
-                <Item>
-                    <img className={'image'} src={wallet_connect} alt="walletconnect"/>
-                    <div>WalletConnect</div>
-                </Item>
-                <Item>
-                    <img className={'image'} src={coinbase} alt="coinbase"/>
-                    <div>Coinbase</div>
-                </Item>
-            </div>
-        </Container>
-        <Footer/>
-    </div>);
+    const {status, connect, account} = useMetaMask();
+
+    if (status === "initializing") {
+        return <div>Synchronisation with MetaMask ongoing...</div>;
+    } else if (status === "unavailable") {
+        return <div>MetaMask not available :\</div>;
+    } else if (status === "notConnected") {
+        return (<div>
+            <Header pageTitle={"Wallet Authentication"} linkTree={'Wallet Authentication'}/>
+            <Container>
+                <div className={'center'}>
+                    <Item onClick={connect}>
+                        <img className={'image'} src={metamask} alt="metamask"/>
+                        <div>Metamask</div>
+                    </Item>
+                    <Item>
+                        <img className={'image'} src={phantom} alt="phantom"/>
+                        <div>Phantom</div>
+                    </Item>
+                    <Item>
+                        <img className={'image'} src={trust_wallet} alt="trustwallet"/>
+                        <div>Trust Wallet</div>
+                    </Item>
+                    <Item>
+                        <img className={'image'} src={wallet_connect} alt="walletconnect"/>
+                        <div>WalletConnect</div>
+                    </Item>
+                    <Item>
+                        <img className={'image'} src={coinbase} alt="coinbase"/>
+                        <div>Coinbase</div>
+                    </Item>
+                </div>
+            </Container>
+            <Footer/>
+        </div>);
+    } else if (status === "connecting") {
+        return <div>Connecting...</div>;
+    } else if (status === "connected") {
+        setTimeout(() => {
+                window.location.href = "/";
+            }
+            , 10000);
+        return <div>Connected with account {account}</div>;
+
+        // window.location.href = "/";
+    } else {
+        return <div>Unknown status Hello</div>;
+    }
+
+
 }
 
 export default WalletAuthenticationPage;

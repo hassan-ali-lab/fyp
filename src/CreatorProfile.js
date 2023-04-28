@@ -5,6 +5,7 @@ import React, {useState} from "react";
 import Card from "./components/Card";
 import Modal1 from "./Modals/Modal1";
 import {Link} from "react-router-dom";
+import {useMetaMask} from "metamask-react";
 
 const profilePic = process.env.PUBLIC_URL + '/profile-images/profile.png';
 const eth = process.env.PUBLIC_URL + '/Eth.png';
@@ -189,6 +190,10 @@ const RightDiv = styled.div`
 `
 
 function UserProfile(props) {
+    const {status} = useMetaMask();
+    if (status === "notConnected") {
+        window.location.href = '/wallet-authentication';
+    }
     const [activeButton, setActiveButton] = useState("items");
     const [name, setName] = useState("John Doe");
     const [account, setAccount] = useState("0x13ccCb7B1b524c73486b7EC58dDA0Fa5A0763FAd")

@@ -8,6 +8,7 @@ import NFTCollectionExplore from "./components/NFTCollectionExplore";
 import FeaturedArtistsSection from "./components/FeaturedArtistsSection";
 import Footer from "./components/Footer";
 import styled from "styled-components";
+import {useMetaMask} from "metamask-react";
 
 const Container = styled.div`
   background-color: transparent;
@@ -19,8 +20,9 @@ const Container = styled.div`
 `
 
 function LandingPage(props) {
+    const {status} = useMetaMask();
     return (<Container>
-        <NavBar1/>
+        <NavBar1 status={status}/>
         <Hero/>
         <Section1/>
         <Section2/>

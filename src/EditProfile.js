@@ -7,6 +7,7 @@ import React, {useState} from "react";
 // import axios from "axios";
 // import Web3Modal from "web3modal";
 import {useFilePicker} from "use-file-picker";
+import {useMetaMask} from "metamask-react";
 
 const profilePic = process.env.PUBLIC_URL + '/edit-profile/profile.png';
 const coverPic = process.env.PUBLIC_URL + '/edit-profile/cover.png';
@@ -204,7 +205,10 @@ const Button2 = styled.button`
 // pageDescription: string
 
 function EditProfile(props) {
-
+    const {status} = useMetaMask();
+    if (status === "notConnected") {
+        window.location.href = '/wallet-authentication';
+    }
     const [openFileSelector, {filesContent}] = useFilePicker({
         readAs: 'DataURL',
         accept: 'image/*',

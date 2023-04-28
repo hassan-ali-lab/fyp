@@ -3,7 +3,7 @@ pragma solidity ^0.8.0;
 
 import '@openzeppelin/contracts/utils/Counters.sol';
 import '@openzeppelin/contracts/security/ReentrancyGuard.sol';
-import 'truffle/Console.sol';
+import 'truffle/console.sol';
 
 contract Auction is ReentrancyGuard {
     using Counters for Counters.Counter;
@@ -11,7 +11,7 @@ contract Auction is ReentrancyGuard {
 
     Counters.Counter private _bidItemIds;
 
-    struct BidToken {
+    struct AuctionToken {
         uint itemId;
         uint256 tokenId;
         address payable auctionStarter;
@@ -23,7 +23,7 @@ contract Auction is ReentrancyGuard {
 
     address payable owner;
 
-    mapping(uint256 => BidToken) private idToBidToken;
+    mapping(uint256 => AuctionToken) private idToBidToken;
 
 
     constructor(){
@@ -87,7 +87,7 @@ contract Auction is ReentrancyGuard {
         _bidItemIds.increment();
         uint itemId = _bidItemIds.current();
 
-        idToBidToken[itemId] = BidToken(
+        idToBidToken[itemId] = AuctionToken(
             itemId,
             tokenId,
             payable(msg.sender),
@@ -107,23 +107,23 @@ contract Auction is ReentrancyGuard {
     }
 
     // list Items
-    function listBidItems() public view returns (BidToken[] memory) {
+    function listBidItems() public view returns (AuctionToken[] memory) {
         uint itemCount = _bidItemIds.current();
         uint unsoldItemCount = _bidItemIds.current();
         uint currentIndex = 0;
 
-        BidToken[] memory temp = new BidToken[](unsoldItemCount);
+        AuctionToken[] memory temp = new AuctionToken[](unsoldItemCount);
         for (uint i = 0; i < itemCount; i++) {// loop through all items
             if (idToBidToken[i + 1].completed == false && idToBidToken[i + 1].auctionStarter != msg.sender) {// only show items that are not closed
                 uint currentId = i + 1;
-                BidToken storage item = idToBidToken[currentId];
+                AuctionToken storage item = idToBidToken[currentId];
                 temp[currentIndex] = item;
                 currentIndex += 1;
             }
         }
 
         // remove empty items
-        BidToken[] memory items = new BidToken[](currentIndex);
+        AuctionToken[] memory items = new AuctionToken[](currentIndex);
         for (uint i = 0; i < currentIndex; i++) {
             items[i] = temp[i];
         }

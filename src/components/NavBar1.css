@@ -81,9 +81,10 @@
     align-items: center;
     justify-content: center;
     flex-direction: row;
+    position: relative;
 }
 
-.right-button-links div {
+.right-button-links > .item {
 
     display: flex;
     align-items: center;

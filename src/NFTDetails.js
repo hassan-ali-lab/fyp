@@ -6,6 +6,7 @@ import Card from "./components/Card";
 import Modal1 from "./Modals/Modal1";
 import BidSuccessModal from "./Modals/BidSuccessModal";
 import BidPlaceModal from "./Modals/BidPlaceModal";
+import {useMetaMask} from "metamask-react";
 
 const profilePic = process.env.PUBLIC_URL + '/profile-images/profile.png';
 // const downarrow = process.env.PUBLIC_URL + '/arrow-down.svg';
@@ -457,10 +458,16 @@ const ImageCard = styled.div`
   }
 `
 
-function UserProfile(props) {
+function NFTDetails(props) {
+    const {status} = useMetaMask();
+    if (status === "notConnected") {
+        window.location.href = '/wallet-authentication';
+    }
     const [activeButton, setActiveButton] = useState("all");
-    const [name, setName] = useState("John Doe");
-    const [account, setAccount] = useState("0x13ccCb7B1b524c73486b7EC58dDA0Fa5A0763FAd")
+
+
+    // const [name, setName] = useState("John Doe");
+    // const [account, setAccount] = useState("0x13ccCb7B1b524c73486b7EC58dDA0Fa5A0763FAd")
     const [parentModelIsOpen, setParentModelIsOpen] = React.useState(false);
     const [childModelIsOpen, setChildModelIsOpen] = React.useState(false);
     const buttons = {
@@ -673,4 +680,4 @@ function UserProfile(props) {
     )
 }
 
-export default UserProfile;
+export default NFTDetails;

@@ -3,6 +3,7 @@ import Header from "./components/Header";
 import Footer from "./components/Footer";
 import {Link} from "react-router-dom";
 import {useState} from "react";
+import {useMetaMask} from "metamask-react";
 
 const img1Url = process.env.PUBLIC_URL + '/create-nft-images/Image1.png';
 const img2Url = process.env.PUBLIC_URL + '/create-nft-images/Image2.png';
@@ -51,8 +52,14 @@ const Card = styled.div`
 `
 
 function CreateNFTPage(props) {
+    const {status} = useMetaMask();
+    if (status === "notConnected") {
+        window.location.href = '/wallet-authentication';
+    }
+
     const [image1, setImage1] = useState(img1Url);
     const [image2, setImage2] = useState(img2Url);
+
 
     return (<div>
         <Header pageTitle={"Create NFT"} linkTree={'create nft'}/>

@@ -1,6 +1,6 @@
  
-export const marketaddress = "0x0FB7BA298C8e1e31f1dB849A4A818345635c6216";
-export const nftaddress = "0xd01D0A0CBF9c18e62c5A781513621687BA0a4d3C";
-export const biddingAddress = "0x566Be99C9327dF3845390076F2630dED5fE73Ec7";
-export const auctionAddress = "0xeb9Be8b3d999FA1497aAEF99bA64Aaa7efE7689D";
+export const marketaddress = "0xee728A867885DcD5e37044868acCA411b8C92135";
+export const nftaddress = "0x858FE379E99A5881360D5c9039E3A928D86804dc";
+export const biddingAddress = "0x65bD1Cf977479Cc016D82dF4a04Fdb3A9C80D1A7";
+export const auctionAddress = "0x84F1a1401a83A662E3F2604BfaD7C2C8BE9c0016";
         

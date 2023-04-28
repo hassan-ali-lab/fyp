@@ -57,7 +57,7 @@ const Navbar = styled.div`
 `
 const SearchBox = styled.div`
 
-  width:75%; /* width fit-content */
+  width: 75%; /* width fit-content */
   position: relative; /* position relative to the parent */
   padding-right: 80px;
 `
@@ -156,8 +156,13 @@ function Header(props) {
                     <div className={'item'}>Explore
                         <img src={arrow_down_url} alt="arrow-down.svg" height={'10'}/>
                     </div>
+
                 </Link>
-                <div className={'item'}>Stats <img src={arrow_down_url} alt="arrow-down.svg" height={'10'}/></div>
+                <Link className={'whiteA'} to={'/stats'}>
+
+                    <div className={'item'}>Stats <img src={arrow_down_url} alt="arrow-down.svg" height={'10'}/></div>
+                </Link>
+
                 <Link to={'/create-nft'} className={'whiteA'}>
                     <div className={'item'}>Create <img src={arrow_down_url} alt="arrow-down.svg" height={'10'}/></div>
                 </Link>
