@@ -167,6 +167,7 @@ contract Marketplace is ReentrancyGuard {
         uint price, // price of the toke
         string memory name, // name of the token
         string memory description, // description of the token
+        uint time,
         bool forSale // is the token for sale
     ) public payable nonReentrant {
         // nonReentrant is a modifier to prevent reentry attack
@@ -283,7 +284,7 @@ contract Marketplace is ReentrancyGuard {
                 itemId, // unique id for each item
                 payable(address(0)), // address of the bidder
                 0, // bid amount
-                0, // auctionEndTime
+                time, // auctionEndTime
                 0, // bid counter
                 false, // closed
                 false // completed

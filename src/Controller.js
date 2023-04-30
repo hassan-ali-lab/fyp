@@ -1,7 +1,7 @@
 import axios from "axios";
 import {PinataAPI_KEY, PinataAPI_SECRET} from "./Pinata";
 import Web3Modal from "web3modal";
-import {ethers} from "ethers";
+import {BigNumber, ethers} from "ethers";
 import {marketaddress, nftaddress} from "./config";
 import NFT from "./build/contracts/NFT.json";
 import Marketplace from "./build/contracts/Marketplace.json";
@@ -49,7 +49,7 @@ export const sendFileToIPFS = async (imageFile) => {
 }
 
 // create nft
-export const createNFT = async (url, title, description, price) => {
+export const createMarketItem = async (itemType, url, title, description, time, price) => {
     // create the items and list them on the marketplace
     // connect to metamask
     const web3Modal = new Web3Modal({
@@ -68,7 +68,10 @@ export const createNFT = async (url, title, description, price) => {
     let value = event.args[2]
     console.log(tx)
     let tokenId = value.toNumber()
-    const price_value = ethers.utils.parseUnits(price, 'ether') // this is the price of the item
+    let price_value = BigNumber.from(0)
+    if (price !== "0") {
+        price_value = ethers.utils.parseUnits(price, 'ether') // this is the price of the item
+    }
     // ethers.utils.parseUnits('1.0', 'ether') equals 1.0 ether which is 1000000000000000000 wei
     // wei is the smallest unit of ether
 
@@ -76,14 +79,15 @@ export const createNFT = async (url, title, description, price) => {
     // ethers is a library that helps us interact with the blockchain
     contract = new ethers.Contract(marketaddress, Marketplace.abi, signer) // this is the marketplace contract
     let main_price = await contract.getListingPrice()  // this is the listing price + the price of the item
-
-    transaction = await contract.createMarketItem(1, nftaddress, tokenId, price_value, title, description, true, {
+    time = BigNumber.from(time)
+    transaction = await contract.createMarketItem(itemType, nftaddress, tokenId, price_value, title, description, time, true, {
         value: main_price
     }) // function in the marketplace contract
     await transaction.wait()
     console.log("Item created successfully")
     console.log(transaction)
 }
+
 
 // getAllNFTs
 export const getAllNFTs = async () => {
@@ -97,19 +101,18 @@ export const getAllNFTs = async () => {
     const data = await marketContract.getAllItems()
     return await Promise.all(data.map(async (item) => {
         return ({
+            itemType: item.itemType.toNumber(),
             itemId: item.itemId.toNumber(),
-            price: ethers.utils.formatUnits(item.price.toString(), "ether"),
-            image: await nftContract.tokenURI(item.tokenId),
             nftContract: item.nftContract,
+            image: await nftContract.tokenURI(item.tokenId), // tokenId
             name: item.name,
+            description: item.description,
             creator: item.creator,
             owner: item._owner,
+            price: ethers.utils.formatUnits(item.price.toString(), "ether"),
             forSale: item.forSale,
-            description: item.description
         })
     }));
-
-
 }
 
 export const getMyNFTs = async () => {
@@ -136,7 +139,6 @@ export const getMyNFTs = async () => {
     }));
 
 }
-
 
 export const getNFT = async (id) => {
     const web3Modal = new Web3Modal()

@@ -4,7 +4,7 @@ import Footer from "./components/Footer";
 import React, {useEffect, useState} from "react";
 import {FileUploader} from "react-drag-drop-files";
 import Card from "./components/Card";
-import {sendFileToIPFS, createNFT} from "./Controller"
+import {sendFileToIPFS, createMarketItem} from "./Controller"
 import {useMetaMask} from "metamask-react";
 
 const eth = process.env.PUBLIC_URL + '/Eth.png';
@@ -140,22 +140,15 @@ function CreateNFTFormPage() {
     const {status} = useMetaMask();
     if (status === "notConnected") {
         window.location.href = '/authentication';
-
     }
-    const [imageFile, setImageFile] = useState(null);
-    // const [success, setSuccess] = useState(false);
-    const [price, setPrice] = useState(0);
-    const [title, setTitle] = useState(null);
-    const [description, setDescription] = useState(null);
-    // const fileReader = new FileReader();
-    const [option, setOption] = useState('fixed price');
-    const [itemType, setItemType] = useState(1);
 
-    // fileReader.onloadend = (e) => {
-    //
-    //     setImageFile(e.target.result);
-    //     console.log(e.target.result)
-    // }
+
+    const [imageFile, setImageFile] = useState(null);
+    const [price, setPrice] = useState("0");
+    const [title, setTitle] = useState("");
+    const [description, setDescription] = useState("");
+    const [time, setTime] = useState("0");
+    const [itemType, setItemType] = useState(1);
 
 
     const handleForm = (event) => {
@@ -167,18 +160,27 @@ function CreateNFTFormPage() {
         }
 
         sendFileToIPFS(imageFile).then(url => {
-            switch (option) {
-                case 'fixed price':
-                    console.log(url, title, description, price)
-
-                    createNFT(url, title, description, price).then((v) => {
+            switch (itemType) {
+                case 1:
+                    createMarketItem(itemType, url, title, description, "0", price).then((v) => {
                         console.log(v)
                     }).catch(e => {
+                        console.log(e);
                     })
                     break;
-                case 'time auction':
+                case 2:
+                    createMarketItem(itemType, url, title, description, "0", "0").then((v) => {
+                        console.log(v)
+                    }).catch(e => {
+                        console.log(e);
+                    })
                     break;
-                case 'open for bids':
+                case 3:
+                    createMarketItem(itemType, url, title, description, time, "0").then((v) => {
+                        console.log(v)
+                    }).catch(e => {
+                        console.log(e);
+                    })
                     break;
                 default:
             }
@@ -212,16 +214,15 @@ function CreateNFTFormPage() {
                         className={'file_uploader'}
                     />
                 </Dropper>
-                <h2>Select Method*</h2>
+                <h2>Select Method* ({itemType})</h2>
                 <div className={'btn-strip'}>
                     <div id={'fixed-price '} className={'fixed-price active'} onClick={() => {
                         document.getElementsByClassName('fixed-price')[0].classList.add('active');
                         document.getElementsByClassName('time-auction')[0].classList.remove('active');
                         document.getElementsByClassName('open-for-bids')[0].classList.remove('active');
-                        document.getElementsByClassName('option')[0].style.display = 'inherit';
-                        setOption('fixed price');
+                        document.getElementsByClassName('price_option')[0].style.display = 'inherit';
+                        document.getElementsByClassName('time_option')[0].style.display = 'none';
                         setItemType(1);
-                        console.log(itemType)
                     }}>Fixed Rate
                     </div>
                     <div id={'time-auction'} className={'time-auction'} onClick={() => {
@@ -229,10 +230,9 @@ function CreateNFTFormPage() {
                         document.getElementsByClassName('time-auction')[0].classList.add('active');
                         document.getElementsByClassName('open-for-bids')[0].classList.remove('active');
                         // display options are block,inline, inline-block,
-                        document.getElementsByClassName('option')[0].style.display = 'inherit';
-                        setOption('time auction');
+                        document.getElementsByClassName('price_option')[0].style.display = 'none';
+                        document.getElementsByClassName('time_option')[0].style.display = 'inherit';
                         setItemType(3);
-                        console.log(itemType)
                     }}>Time Auction
                     </div>
                     <div id={'open-for-bids'} className={'open-for-bids'}
@@ -241,10 +241,9 @@ function CreateNFTFormPage() {
                              document.getElementsByClassName('time-auction')[0].classList.remove('active');
                              document.getElementsByClassName('open-for-bids')[0].classList.add('active');
                              // remove option element
-                             document.getElementsByClassName('option')[0].style.display = 'none';
-                             setOption('open for bids');
+                             document.getElementsByClassName('price_option')[0].style.display = 'none';
+                             document.getElementsByClassName('time_option')[0].style.display = 'none';
                              setItemType(2);
-                             console.log(itemType)
                          }}
                     >Open For Bid
                     </div>
@@ -268,14 +267,28 @@ function CreateNFTFormPage() {
                         />
                     </label>
                 </div>
-                <div className={'btn-strip option'}>
-                    <label>{option}<br/>
+                <div className={'btn-strip price_option'}>
+                    <label>Price<br/>
                         <input className={'input'} type="number" name="title"
                                placeholder={'0'}
                                onChange={e => {
                                    setPrice(e.target.value)
                                }}
 
+                        />
+                    </label>
+                </div>
+                <div className={'btn-strip time_option'} style={
+                    {
+                        display: 'none'
+                    }
+                }>
+                    <label>Time<br/>
+                        <input className={'input'} type="number" name="time"
+                               placeholder={'time in minutes'}
+                               onChange={e => {
+                                   setTime(e.target.value);
+                               }}
                         />
                     </label>
                 </div>
