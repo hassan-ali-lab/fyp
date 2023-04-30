@@ -54,7 +54,8 @@ const Card = styled.div`
 function CreateNFTPage(props) {
     const {status} = useMetaMask();
     if (status === "notConnected") {
-        window.location.href = '/wallet-authentication';
+        window.location.href = '/authentication';
+
     }
 
     const [image1, setImage1] = useState(img1Url);

@@ -1,4 +1,4 @@
-del -r src/build
 truffle compile
 truffle migrate --reset
-mv build src/build
+del -r src/build
+mv build src/bunpild

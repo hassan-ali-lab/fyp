@@ -346,7 +346,7 @@ const RightDiv = styled.div`
 function UserProfile(props) {
     const {status} = useMetaMask();
     if (status === "notConnected") {
-        window.location.href = '/wallet-authentication';
+        window.location.href = '/authentication';
     }
     const [activeButton, setActiveButton] = useState("all");
     const [name, setName] = useState("John Doe");

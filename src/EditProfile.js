@@ -207,7 +207,8 @@ const Button2 = styled.button`
 function EditProfile(props) {
     const {status} = useMetaMask();
     if (status === "notConnected") {
-        window.location.href = '/wallet-authentication';
+        window.location.href = '/authentication';
+
     }
     const [openFileSelector, {filesContent}] = useFilePicker({
         readAs: 'DataURL',

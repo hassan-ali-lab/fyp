@@ -51,7 +51,7 @@ function NavBar1({status}) {
                         <DropDown open={open} items={[1, 2, 3, 4]}/>
 
                         <img className={'circle'} src={profilePic} alt="profile"
-                             height="80" width="80" onClick={() => {
+                             height="60" width="60" onClick={() => {
                             handleDropdown()
                         }}/>
                     </div> :

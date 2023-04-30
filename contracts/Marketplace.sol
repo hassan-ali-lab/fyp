@@ -5,12 +5,7 @@ import "@openzeppelin/contracts/token/ERC721/ERC721.sol"; // import ERC721
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol"; // import ReentrancyGuard
 import "@openzeppelin/contracts/utils/Counters.sol"; // import Counters
 import "truffle/console.sol";
-// getListingPrice
-// createMarketItem
-// createMarketSale
-// fetchMarketItems
-// fetchMyNFTs
-// fetchItemsCreated
+
 
 contract Marketplace is ReentrancyGuard {
     using Counters for Counters.Counter; //  use the counter library - use the counter for the token id
@@ -38,7 +33,13 @@ contract Marketplace is ReentrancyGuard {
 
     // structs can act like objects
     // create a struct for the market item
+
+    // type 1 sale
+    // type 2 bidding
+    // type 3 auction - timer
+
     struct MarketToken {
+        uint itemType;
         uint itemId; // unique id for each item
         address nftContract; // address of the contract
         uint tokenId; // token id
@@ -50,9 +51,39 @@ contract Marketplace is ReentrancyGuard {
         bool forSale; // is the token for sale
     }
 
+    struct BidInfo {
+        address payable highestBidder;
+        uint256 highestBid;
+    }
+
+    struct BidToken {
+        uint itemType;
+        uint itemId; // unique id for each item
+        address payable highestBidder;
+        uint256 highestBid;
+        uint counter;
+        bool closed;
+        bool completed;
+    }
+
+    struct AuctionToken {
+        uint itemType;
+        uint itemId; // unique id for each item
+        address payable highestBidder;
+        uint256 highestBid;
+        uint256 auctionEndTime;
+        uint counter;
+        bool closed;
+        bool completed;
+    }
+
+
     // tokenId return which MarketToken -  fetch which one it is
 
     mapping(uint256 => MarketToken) private idToMarketToken; // private - only accessible in this contract
+    mapping(uint256 => BidToken) private idToBidToken; // private - only accessible in this contract
+    mapping(uint256 => AuctionToken) private idToAuctionToken; // private - only accessible in this contract
+    mapping(uint256 => mapping(uint => BidInfo)) bids;
 
     // listen to events from front end applications
     event MarketTokenMinted(
@@ -78,6 +109,46 @@ contract Marketplace is ReentrancyGuard {
         return _tokenIds.current();
     }
 
+    function placeBid(uint itemId) public payable {
+        require(msg.value > idToBidToken[itemId].highestBid, "Bid must be higher than current highest bid.");
+        require(msg.sender != idToBidToken[itemId].highestBidder, "You are already the highest bidder.");
+        require(msg.sender != idToMarketToken[itemId]._owner, "You are the auction starter.");
+        require(idToBidToken[itemId].closed == false, "Auction is closed.");
+
+        uint value = msg.value;
+        if (idToBidToken[itemId].highestBidder != payable(address(0))) {
+            // Refund the previous highest bidder if they are not the owner
+            // transfer from contract to address
+            BidInfo memory previousBidder;
+            // memory - temporary storage
+            previousBidder.highestBidder = idToBidToken[itemId].highestBidder;
+            previousBidder.highestBid = idToBidToken[itemId].highestBid;
+            bids[itemId][idToBidToken[itemId].counter] = previousBidder;
+
+            idToBidToken[itemId].counter = idToBidToken[itemId].counter + 1;
+
+            uint highestBid = idToBidToken[itemId].highestBid;
+            value = value - highestBid;
+
+            idToBidToken[itemId].highestBidder.transfer(highestBid);
+            // Refund the previous highest bidder from the highest bid amount (if there is one) to the highest bidder address (if there is one)
+        }
+
+        idToBidToken[itemId].highestBidder = payable(msg.sender);
+        // Set the new highest bidder to the current bidder address (msg.sender)
+        // transfer from address to contract
+        idToBidToken[itemId].highestBid = msg.value;
+        // Set the new highest bid
+        // transfer from address to contract
+        owner.transfer(value);
+        // owner is not visible in the contract so we need to make it payable
+
+
+        console.log("Bid placed");
+        console.log("Highest Bidder: %s", msg.sender);
+        console.log("Highest Bid: %s", msg.value);
+    }
+
     function countMarketItemsForSale() public view returns (uint256) {
         uint256 count = 0;
         for (uint256 i = 0; i < _tokenIds._value; i++) {
@@ -90,6 +161,7 @@ contract Marketplace is ReentrancyGuard {
 
 
     function createMarketItem(
+        uint itemType,
         address nftContract, // address of the contract
         uint tokenId, // token id
         uint price, // price of the toke
@@ -100,13 +172,15 @@ contract Marketplace is ReentrancyGuard {
         // nonReentrant is a modifier to prevent reentry attack
 
         // require - check if the price is greater than 0
-        require(price > 0, "Price must be at least one wei");
+        require(price >= 0, "Price must be at least one wei");
 
         // require - check if the price is equal to the listing price
         require(
             msg.value == listingPrice,
             "Price must be equal to listing price"
         );
+
+        require(itemType == 1 || itemType == 2 || itemType == 3, "Item type must be 1, 2 or 3. 1 for sale, 2 for bidding, 3 for auction");
         // increment the token id
         _tokenIds.increment();
 
@@ -118,32 +192,124 @@ contract Marketplace is ReentrancyGuard {
 
         console.log("_tokenIds count: %s", _tokenIds._value);
 
+        if (itemType == 1) {
+            //putting it up for sale - bool - no owner
+            idToMarketToken[itemId] = MarketToken(
+                1,
+                itemId, // unique id for each item
+                nftContract, // address of the contract
+                tokenId, // token id
+                name,
+                description,
+                msg.sender, // address of the creator
+                payable(msg.sender), // address of the owner
+                price, // price of the token
+                forSale // is the token for sale
+            );
 
-        //putting it up for sale - bool - no owner
-        idToMarketToken[itemId] = MarketToken(
-            itemId, // unique id for each item
-            nftContract, // address of the contract
-            tokenId, // token id
-            name,
-            description,
-            msg.sender, // address of the creator
-            payable(msg.sender), // address of the owner
-            price, // price of the token
-            forSale // is the token for sale
-        );
+            console.log("Market Item Object");
+            console.log("itemType %s", idToMarketToken[itemId].itemType);
+            console.log("itemId %s", idToMarketToken[itemId].itemId);
+            console.log("nftContract %s", idToMarketToken[itemId].nftContract);
+            console.log("tokenId %s", idToMarketToken[itemId].tokenId);
+            console.log("name %s", idToMarketToken[itemId].name);
+            console.log("description %s", idToMarketToken[itemId].description);
+            console.log("creator %s", idToMarketToken[itemId].creator);
+            console.log("owner %s", idToMarketToken[itemId]._owner);
+            console.log("price %s", idToMarketToken[itemId].price);
+            console.log("forSale %s", idToMarketToken[itemId].forSale);
+        }
+        else if (itemType == 2) {
+            //bidding
+            idToMarketToken[itemId] = MarketToken(
+                2,
+                itemId, // unique id for each item
+                nftContract, // address of the contract
+                tokenId, // token id
+                name,
+                description,
+                msg.sender, // address of the creator
+                payable(msg.sender), // address of the owner
+                0, // price of the token
+                forSale // is the token for sale
+            );
+            idToBidToken[itemId] = BidToken(
+                2,
+                itemId, // unique id for each item
+                payable(address(0)), // address of the bidder
+                0, // bid amount
+                0, // bid counter
+                false, // closed
+                false // completed
+            );
 
-        console.log("Object");
-        console.log(idToMarketToken[itemId].itemId);
-        console.log(idToMarketToken[itemId].nftContract);
-        console.log(idToMarketToken[itemId].tokenId);
-        console.log(idToMarketToken[itemId].name);
-        //a
-        console.log(idToMarketToken[itemId].description);
-        //b
-        console.log(idToMarketToken[itemId].creator);
-        console.log(idToMarketToken[itemId]._owner);
-        console.log(idToMarketToken[itemId].price);
-        console.log(idToMarketToken[itemId].forSale);
+            console.log("Bid Object");
+            console.log("itemType %s", idToBidToken[itemId].itemType);
+            console.log("itemId %s", idToBidToken[itemId].itemId);
+            console.log("highestBidder %s", idToBidToken[itemId].highestBidder);
+            console.log("highestBid %s", idToBidToken[itemId].highestBid);
+            console.log("counter %s", idToBidToken[itemId].counter);
+            console.log("closed %s", idToBidToken[itemId].closed);
+            console.log("completed %s", idToBidToken[itemId].completed);
+
+            console.log("Market Item Object");
+            console.log("itemType %s", idToMarketToken[itemId].itemType);
+            console.log("itemId %s", idToMarketToken[itemId].itemId);
+            console.log("nftContract %s", idToMarketToken[itemId].nftContract);
+            console.log("tokenId %s", idToMarketToken[itemId].tokenId);
+            console.log("name %s", idToMarketToken[itemId].name);
+            console.log("description %s", idToMarketToken[itemId].description);
+            console.log("creator %s", idToMarketToken[itemId].creator);
+            console.log("owner %s", idToMarketToken[itemId]._owner);
+            console.log("price %s", idToMarketToken[itemId].price);
+            console.log("forSale %s", idToMarketToken[itemId].forSale);
+        }
+        else if (itemType == 3) {
+            //auction
+            idToMarketToken[itemId] = MarketToken(
+                3,
+                itemId, // unique id for each item
+                nftContract, // address of the contract
+                tokenId, // token id
+                name,
+                description,
+                msg.sender, // address of the creator
+                payable(msg.sender), // address of the owner
+                0, // price of the token
+                forSale // is the token for sale
+            );
+            idToAuctionToken[itemId] = AuctionToken(
+                3,
+                itemId, // unique id for each item
+                payable(address(0)), // address of the bidder
+                0, // bid amount
+                0, // auctionEndTime
+                0, // bid counter
+                false, // closed
+                false // completed
+            );
+
+            console.log("Auction Object");
+            console.log("itemType %s", idToAuctionToken[itemId].itemType);
+            console.log("itemId %s", idToAuctionToken[itemId].itemId);
+            console.log("highestBidder %s", idToAuctionToken[itemId].highestBidder);
+            console.log("highestBid %s", idToAuctionToken[itemId].highestBid);
+            console.log("timeLimit %s", idToAuctionToken[itemId].auctionEndTime);
+            console.log("counter %s", idToAuctionToken[itemId].counter);
+            console.log("closed %s", idToAuctionToken[itemId].closed);
+            console.log("completed %s", idToAuctionToken[itemId].completed);
+
+            console.log("Market Item Object");
+            console.log("itemType %s", idToMarketToken[itemId].itemType);
+            console.log("itemId %s", idToMarketToken[itemId].itemId);
+            console.log("nftContract %s", idToMarketToken[itemId].nftContract);
+            console.log("tokenId %s", idToMarketToken[itemId].tokenId);
+            console.log("name %s", idToMarketToken[itemId].name);
+            console.log("description %s", idToMarketToken[itemId].description);
+            console.log("creator %s", idToMarketToken[itemId].creator);
+            console.log("owner %s", idToMarketToken[itemId]._owner);
+            console.log("price %s", idToMarketToken[itemId].price);
+        }
         // NFT transaction - transfer the token from the seller to the contract
         IERC721(nftContract).transferFrom(msg.sender, address(this), tokenId);
 
@@ -157,6 +323,7 @@ contract Marketplace is ReentrancyGuard {
             price // price of the token
         );
     }
+
 
     // function to conduct transactions and market sales
     function createMarketSale(
@@ -204,12 +371,36 @@ contract Marketplace is ReentrancyGuard {
     }
 
     // getOneItem
-    function getOneItem(
+    function getBidsByItemId(
+        uint256 itemId
+    ) public view returns (BidToken[] memory) {
+        uint totalBidsCount = idToBidToken[itemId].counter;
+        BidToken[] memory tempBids = new BidToken[](totalBidsCount);
+
+        for (uint i = 0; i < totalBidsCount; i++) {
+            tempBids[i] = idToBidToken[itemId];
+        }
+        return tempBids;
+    }
+
+    // getOneItem
+    function getMarketItem(
         uint256 itemId
     ) public view returns (MarketToken memory) {
         return idToMarketToken[itemId];
     }
 
+    function getBidItem(
+        uint256 itemId
+    ) public view returns (BidToken memory) {
+        return idToBidToken[itemId];
+    }
+
+    function getAuctionItem(
+        uint256 itemId
+    ) public view returns (AuctionToken memory) {
+        return idToAuctionToken[itemId];
+    }
 
     function getAllItems() public view returns (MarketToken[] memory) {
         // instead of .owner it will be the .seller
@@ -230,5 +421,15 @@ contract Marketplace is ReentrancyGuard {
 
         // return the items - array of minted nfts
         return items;
+    }
+
+
+    function resellMarketItem(uint itemId, uint price) public payable nonReentrant {
+        require(idToMarketToken[itemId]._owner == msg.sender, "You are not the owner of this item");
+        require(idToMarketToken[itemId].forSale == false, "This item is already for sale");
+        require(idToMarketToken[itemId].itemType == 1, "This item is not a market item");
+
+        idToMarketToken[itemId].forSale = true;
+        idToMarketToken[itemId].price = price;
     }
 }

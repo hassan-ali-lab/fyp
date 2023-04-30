@@ -7,6 +7,8 @@ import Modal1 from "./Modals/Modal1";
 import BidSuccessModal from "./Modals/BidSuccessModal";
 import BidPlaceModal from "./Modals/BidPlaceModal";
 import {useMetaMask} from "metamask-react";
+import {useParams} from "react-router-dom";
+import {buyNFT, getNFT} from "./Controller";
 
 const profilePic = process.env.PUBLIC_URL + '/profile-images/profile.png';
 // const downarrow = process.env.PUBLIC_URL + '/arrow-down.svg';
@@ -20,8 +22,7 @@ const customStyles1 = {
         right: 'auto',
         bottom: 'auto',
         marginRight: '-50%',
-        transform: 'translate(-50%, -50%)',
-        // backgroundColor: 'rgba(0,0,0,0.5)'
+        transform: 'translate(-50%, -50%)', // backgroundColor: 'rgba(0,0,0,0.5)'
         border: '1px solid white',
         borderRadius: '40px',
         height: '400px',
@@ -35,8 +36,7 @@ const customStyles2 = {
         right: 'auto',
         bottom: 'auto',
         marginRight: '-50%',
-        transform: 'translate(-50%, -50%)',
-        // backgroundColor: 'rgba(0,0,0,0.5)'
+        transform: 'translate(-50%, -50%)', // backgroundColor: 'rgba(0,0,0,0.5)'
         border: '1px solid white',
         borderRadius: '40px',
         height: '600px',
@@ -122,6 +122,13 @@ const PinkButton = styled.button`
   user-select: none;
   -webkit-user-select: none;
   width: auto;
+
+  :disabled {
+    background-color: #be7698;
+    border: 1px solid #FE3796;
+    color: #FFFFFF;
+    cursor: not-allowed;
+  }
 `
 /*
 
@@ -459,10 +466,28 @@ const ImageCard = styled.div`
 `
 
 function NFTDetails(props) {
-    const {status} = useMetaMask();
+    const {status, account} = useMetaMask();
     if (status === "notConnected") {
-        window.location.href = '/wallet-authentication';
+        window.location.href = '/authentication';
+    } else {
+        console.log(window.ethereum.selectedAddress);
+
     }
+    const [nft, setNFT] = useState({});
+    const [owner, setOwner] = useState(false);
+
+    const params = useParams();
+    useEffect(() => {
+        getNFT(params.id).then((res) => {
+            setNFT(res);
+            // console.log("owner:", res.owner.toString());
+            // console.log("account:", (window.ethereum.selectedAddress).toString());
+            // console.log("equal:", res.owner.toString().toLowerCase() === (window.ethereum.selectedAddress.toString()).toLowerCase());
+            setOwner(res.owner.toString().toLowerCase() === (window.ethereum.selectedAddress.toString()).toLowerCase());
+
+
+        });
+    }, []);
     const [activeButton, setActiveButton] = useState("all");
 
 
@@ -522,162 +547,170 @@ function NFTDetails(props) {
     }
 
     return (<div>
-            <Header pageTitle={"Explore NFTs"} linkTree={"explore"} profilePic={profilePic}/>
-            <BidPlaceModal
-                isOpen={parentModelIsOpen}
-                onAfterOpen={afterParentOpenModal}
-                onRequestClose={closeParentModal}
-                style={customStyles2}
-                openChildModal={openChildModel}
-            />
-            <BidSuccessModal
+        <Header pageTitle={"Explore NFTs"} linkTree={"explore"} profilePic={profilePic}/>
+        <BidPlaceModal
+            isOpen={parentModelIsOpen}
+            onAfterOpen={afterParentOpenModal}
+            onRequestClose={closeParentModal}
+            style={customStyles2}
+            openChildModal={openChildModel}
+        />
+        <BidSuccessModal
 
-                isOpen={childModelIsOpen}
-                onAfterOpen={afterChildOpenModal}
-                onRequestClose={closeChildModal}
-                style={customStyles1}
-            />
-            <Container>
-                <LeftDiv>
-                    <ImageCard>
-                        <img className={'image'} src={high} alt=""/>
-                    </ImageCard>
-                </LeftDiv>
-                <RightDiv>
-                    <p>by Billionaire's NFT Club </p>
-                    <h1 className={'title'}>Golden Skull</h1>
-                    <p className={'detail'}>The Wall Street Official Avatar Fight Club is launching its an NFT<br/>
-                        Collection of over 50k unique pieces from the Wall Street... Read more</p>
-                    <div className={'row'}>
-                        <div className={'profile'}>
-                            <h3>Creator</h3>
-                            <div>
-                                <img src={profilePic} alt=""/> <b>0x13ccCb7B1....b52</b>
-                            </div>
-                        </div>
-                        <div className={'profile'}>
-                            <h3>Current Owner</h3>
-                            <div>
-                                <img src={profilePic} alt=""/> <b>0x13ccCb7B1....b52</b>
-                            </div>
-                        </div>
-                    </div>
-                    <p>Properties</p>
-                    <div className={'items'}>
-                        <div>Quality: Meteorite</div>
-                        <div>Set: Older</div>
-                        <div>God: War</div>
-                        <div>Mana: 2</div>
-                        <div>Rarity: Common</div>
-                        <div>Type: Card</div>
-                        <div>See more</div>
-                    </div>
-
-                    <div className={'price_div'}>
-                        <p>Current Price</p>
+            isOpen={childModelIsOpen}
+            onAfterOpen={afterChildOpenModal}
+            onRequestClose={closeChildModal}
+            style={customStyles1}
+        />
+        <Container>
+            <LeftDiv>
+                <ImageCard>
+                    {nft.image ? <img className={'image'} src={nft.image} alt=""/> :
+                        <img className={'image'} src={high} alt=""/>}
+                </ImageCard>
+            </LeftDiv>
+            <RightDiv>
+                <p>by Billionaire's NFT Club </p>
+                <h1 className={'title'}>Golden Skull</h1>
+                <p className={'detail'}>The Wall Street Official Avatar Fight Club is launching its an NFT<br/>
+                    Collection of over 50k unique pieces from the Wall Street... Read more</p>
+                <div className={'row'}>
+                    <div className={'profile'}>
+                        <h3>Creator</h3>
                         <div>
-                            <h1>~6.38ETH</h1><h3>($4,334.36)</h3>
+                            <img src={profilePic} alt=""/> <b>0x13ccCb7B1....b52</b>
                         </div>
-                        <p>Last sale price ~ 5.93ETH</p>
                     </div>
-                    <div className={'buttons'}>
-                        <PinkButton>Buy Now For 6.38ETH</PinkButton>
+                    <div className={'profile'}>
+                        <h3>Current Owner</h3>
+                        <div>
+                            <img src={profilePic} alt=""/> <b>0x13ccCb7B1....b52</b>
+                        </div>
+                    </div>
+                </div>
+                <p>Properties</p>
+                <div className={'items'}>
+                    <div>Quality: Meteorite</div>
+                    <div>Set: Older</div>
+                    <div>God: War</div>
+                    <div>Mana: 2</div>
+                    <div>Rarity: Common</div>
+                    <div>Type: Card</div>
+                    <div>See more</div>
+                </div>
+
+                <div className={'price_div'}>
+                    <p>Current Price</p>
+                    <div>
+                        <h1>~{nft.price ? nft.price : 6.38}ETH</h1>
+                        <h3>(${nft.price ? nft.price * 1886.44 : "4,334.36"})</h3>
+                    </div>
+                    <p>Last sale price ~ 5.93ETH</p>
+                </div>
+                <div className={'buttons'}>
+                    {!owner ?
                         <PinkButton onClick={
                             () => {
-                                setParentModelIsOpen(true)
+                                buyNFT(nft.itemId, nft.price).then((res) => {
+                                    console.log("buy nft: ", res);
+                                })
                             }
-                        }>Place a Bid</PinkButton>
+                        }> Buy Now For {nft.price ? nft.price : 6.38}ETH</PinkButton> :
+                        <PinkButton disabled={true}> Buy Now
+                            For {nft.price ? nft.price : 6.38}ETH</PinkButton>}
+                    {/*<PinkButton onClick={() => {*/}
+                    {/*    setParentModelIsOpen(true)*/}
+                    {/*}}>Place a Bid</PinkButton>*/}
+                </div>
+            </RightDiv>
+        </Container>
+        <Container>
+            <ACard>
+                <h3 className={'title'}>Offers</h3>
+                <div className={'columns'}>
+                    <div>
+                        <p>Price (ETH)</p>
+                        <h3 className={'element'}><img src={eth} alt={'eth'}/> 0.001 ETH</h3>
+                        <h3 className={'element'}><img src={eth} alt={'eth'}/> 0.001 ETH</h3>
+                        <h3 className={'element'}><img src={eth} alt={'eth'}/> 0.001 ETH</h3>
+                        <h3 className={'element'}><img src={eth} alt={'eth'}/> 0.001 ETH</h3>
+                        <h3 className={'element'}><img src={eth} alt={'eth'}/> 0.001 ETH</h3>
                     </div>
-                </RightDiv>
-            </Container>
-            <Container>
-                <ACard>
-                    <h3 className={'title'}>Offers</h3>
-                    <div className={'columns'}>
-                        <div>
-                            <p>Price (ETH)</p>
-                            <h3 className={'element'}><img src={eth} alt={'eth'}/> 0.001 ETH</h3>
-                            <h3 className={'element'}><img src={eth} alt={'eth'}/> 0.001 ETH</h3>
-                            <h3 className={'element'}><img src={eth} alt={'eth'}/> 0.001 ETH</h3>
-                            <h3 className={'element'}><img src={eth} alt={'eth'}/> 0.001 ETH</h3>
-                            <h3 className={'element'}><img src={eth} alt={'eth'}/> 0.001 ETH</h3>
-                        </div>
-                        <div>
-                            <p>USD Price</p>
-                            <h3 className={'element'}>$384.95</h3>
-                            <h3 className={'element'}>$384.95</h3>
-                            <h3 className={'element'}>$384.95</h3>
-                            <h3 className={'element'}>$384.95</h3>
-                            <h3 className={'element'}>$384.95</h3>
-                        </div>
-                        <div>
-                            <p>Floor Difference</p>
-                            <h3 className={'element'}>31% Below</h3>
-                            <h3 className={'element'}>31% Below</h3>
-                            <h3 className={'element'}>31% Below</h3>
-                            <h3 className={'element'}>31% Below</h3>
-                            <h3 className={'element'}>31% Below</h3>
-                        </div>
-                        <div>
-                            <p>Expiration</p>
-                            <h3 className={'element'}>11 min</h3>
-                            <h3 className={'element'}>11 min</h3>
-                            <h3 className={'element'}>11 min</h3>
-                            <h3 className={'element'}>11 min</h3>
-                            <h3 className={'element'}>11 min</h3>
-
-                        </div>
-                        <div>
-                            <p>From</p>
-                            <h3 className={'element'}>yes_nft</h3>
-                            <h3 className={'element'}>yes_nft</h3>
-                            <h3 className={'element'}>yes_nft</h3>
-                            <h3 className={'element'}>yes_nft</h3>
-                            <h3 className={'element'}>yes_nft</h3>
-                        </div>
+                    <div>
+                        <p>USD Price</p>
+                        <h3 className={'element'}>$384.95</h3>
+                        <h3 className={'element'}>$384.95</h3>
+                        <h3 className={'element'}>$384.95</h3>
+                        <h3 className={'element'}>$384.95</h3>
+                        <h3 className={'element'}>$384.95</h3>
                     </div>
-
-                </ACard>
-
-                <ACard>
-                    <div className={'title'}>
-                        <h2 className={'title-item'}>Details</h2>
-                        <h2 className={'title-item'}>Bids</h2>
-                        <h2 className={'title-item'}>Activity</h2>
+                    <div>
+                        <p>Floor Difference</p>
+                        <h3 className={'element'}>31% Below</h3>
+                        <h3 className={'element'}>31% Below</h3>
+                        <h3 className={'element'}>31% Below</h3>
+                        <h3 className={'element'}>31% Below</h3>
+                        <h3 className={'element'}>31% Below</h3>
                     </div>
-                    <div className={'paragraphs'}>
-                        <p>A collection of 10,000 undead NFTs minted on the Ethereum blockchain. Each unique Deadfella
-                            is randomly generated from a combination of over 400 individually.
-                        </p>
-                        <p>A collection of 10,000 undead NFTs minted on the Ethereum blockchain. Each unique Deadfella
-                            is randomly generated.
-                        </p>
+                    <div>
+                        <p>Expiration</p>
+                        <h3 className={'element'}>11 min</h3>
+                        <h3 className={'element'}>11 min</h3>
+                        <h3 className={'element'}>11 min</h3>
+                        <h3 className={'element'}>11 min</h3>
+                        <h3 className={'element'}>11 min</h3>
+
                     </div>
-                    <div className={'table'}>
-                        <div>
-                            <div>Blockchain</div>
-                            <div>Contract Address</div>
-                            <div>Metadata</div>
-                            <div>Last Updated</div>
-                        </div>
-                        <div>
-                            <div>Ethereum</div>
-                            <div>0x330cd8fec...8b7c</div>
-                            <div>Centralized</div>
-                            <div>03 days ago</div>
-                        </div>
+                    <div>
+                        <p>From</p>
+                        <h3 className={'element'}>yes_nft</h3>
+                        <h3 className={'element'}>yes_nft</h3>
+                        <h3 className={'element'}>yes_nft</h3>
+                        <h3 className={'element'}>yes_nft</h3>
+                        <h3 className={'element'}>yes_nft</h3>
                     </div>
+                </div>
 
-                </ACard>
+            </ACard>
 
-            </Container>
+            <ACard>
+                <div className={'title'}>
+                    <h2 className={'title-item'}>Details</h2>
+                    <h2 className={'title-item'}>Bids</h2>
+                    <h2 className={'title-item'}>Activity</h2>
+                </div>
+                <div className={'paragraphs'}>
+                    <p>A collection of 10,000 undead NFTs minted on the Ethereum blockchain. Each unique Deadfella
+                        is randomly generated from a combination of over 400 individually.
+                    </p>
+                    <p>A collection of 10,000 undead NFTs minted on the Ethereum blockchain. Each unique Deadfella
+                        is randomly generated.
+                    </p>
+                </div>
+                <div className={'table'}>
+                    <div>
+                        <div>Blockchain</div>
+                        <div>Contract Address</div>
+                        <div>Metadata</div>
+                        <div>Last Updated</div>
+                    </div>
+                    <div>
+                        <div>Ethereum</div>
+                        <div>0x330cd8fec...8b7c</div>
+                        <div>Centralized</div>
+                        <div>03 days ago</div>
+                    </div>
+                </div>
 
-            <h2>More from this </h2>
-            <Items/>
+            </ACard>
 
-            <Footer/>
-        </div>
-    )
+        </Container>
+
+        <h2>More from this </h2>
+        <Items/>
+
+        <Footer/>
+    </div>)
 }
 
 export default NFTDetails;

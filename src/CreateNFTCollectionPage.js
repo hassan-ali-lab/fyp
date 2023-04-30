@@ -137,7 +137,8 @@ const fileTypes = ["JPG", "PNG"];
 function CreateNFTFormPage() {
     const {status} = useMetaMask();
     if (status === "notConnected") {
-        window.location.href = '/wallet-authentication';
+        window.location.href = '/authentication';
+
     }
     const [file, setFile] = useState(null);
     const [success, setSuccess] = useState(null);

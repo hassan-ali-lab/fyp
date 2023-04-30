@@ -53,9 +53,8 @@ export const createNFT = async (url, title, description, price) => {
     // create the items and list them on the marketplace
     // connect to metamask
     const web3Modal = new Web3Modal({
-            network: 'http://127.0.0.1:7545'
-        }
-    )
+        network: 'http://127.0.0.1:7545'
+    })
     const connection = await web3Modal.connect()
     const provider = new ethers.providers.Web3Provider(connection)
 
@@ -78,8 +77,7 @@ export const createNFT = async (url, title, description, price) => {
     contract = new ethers.Contract(marketaddress, Marketplace.abi, signer) // this is the marketplace contract
     let main_price = await contract.getListingPrice()  // this is the listing price + the price of the item
 
-
-    transaction = await contract.createMarketItem(nftaddress, tokenId, price_value, title, description, true, {
+    transaction = await contract.createMarketItem(1, nftaddress, tokenId, price_value, title, description, true, {
         value: main_price
     }) // function in the marketplace contract
     await transaction.wait()
@@ -137,4 +135,47 @@ export const getMyNFTs = async () => {
         })
     }));
 
+}
+
+
+export const getNFT = async (id) => {
+    const web3Modal = new Web3Modal()
+    const connection = await web3Modal.connect()
+    const provider = new ethers.providers.Web3Provider(connection)
+    const signer = provider.getSigner()
+    const nftContract = new ethers.Contract(nftaddress, NFT.abi, signer);
+    const marketContract = new ethers.Contract(marketaddress, Marketplace.abi, signer);
+
+    let item = await marketContract.getOneItem(id);
+    let image = await nftContract.tokenURI(item.tokenId.toNumber());
+    return ({
+        itemId: item.itemId.toNumber(),
+        price: ethers.utils.formatUnits(item.price.toString(), "ether"),
+        image: image,
+        nftContract: item.nftContract,
+        name: item.name,
+        creator: item.creator,
+        owner: item._owner,
+        forSale: item.forSale,
+        description: item.description
+    })
+}
+
+export const buyNFT = async (tokenId, nft_price) => {
+    console.log(tokenId)
+    console.log(nft_price)
+    const web3Modal = new Web3Modal()
+    const connection = await web3Modal.connect()
+    const provider = new ethers.providers.Web3Provider(connection)
+    const signer = provider.getSigner()
+    const contract = new ethers.Contract(marketaddress, Marketplace.abi, signer)
+
+    const price = ethers.utils.parseUnits(nft_price.toString(), 'ether')
+    const transaction = await contract.createMarketSale(nftaddress, tokenId, {
+        value: price
+    })
+
+    await transaction.wait()
+    console.log("Item bought successfully")
+    console.log(transaction)
 }

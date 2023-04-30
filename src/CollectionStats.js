@@ -118,7 +118,8 @@ const profilePic = process.env.PUBLIC_URL + '/profile-images/profile.png';
 function WalletAuthenticationPage(props) {
     const {status} = useMetaMask();
     if (status === "notConnected") {
-        window.location.href = '/wallet-authentication';
+        window.location.href = '/authentication';
+
     }
     return (<div>
         <Header pageTitle={"Collection Stats"} linkTree={"Stats"} profilePic={profilePic}/>

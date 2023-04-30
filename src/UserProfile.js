@@ -166,7 +166,8 @@ const RightDiv = styled.div`
 function UserProfile({_name, _account}) {
     const {status} = useMetaMask();
     if (status === "notConnected") {
-        window.location.href = '/wallet-authentication';
+        window.location.href = '/authentication';
+
     }
 
 

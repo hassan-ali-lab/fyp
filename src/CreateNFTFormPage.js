@@ -1,7 +1,7 @@
 import styled from "styled-components";
 import Header from "./components/Header";
 import Footer from "./components/Footer";
-import React, {useState} from "react";
+import React, {useEffect, useState} from "react";
 import {FileUploader} from "react-drag-drop-files";
 import Card from "./components/Card";
 import {sendFileToIPFS, createNFT} from "./Controller"
@@ -139,7 +139,8 @@ const fileTypes = ["JPG", "PNG", "image/png", "image/jpeg"];
 function CreateNFTFormPage() {
     const {status} = useMetaMask();
     if (status === "notConnected") {
-        window.location.href = '/wallet-authentication';
+        window.location.href = '/authentication';
+
     }
     const [imageFile, setImageFile] = useState(null);
     // const [success, setSuccess] = useState(false);
@@ -148,6 +149,7 @@ function CreateNFTFormPage() {
     const [description, setDescription] = useState(null);
     // const fileReader = new FileReader();
     const [option, setOption] = useState('fixed price');
+    const [itemType, setItemType] = useState(1);
 
     // fileReader.onloadend = (e) => {
     //
@@ -218,6 +220,8 @@ function CreateNFTFormPage() {
                         document.getElementsByClassName('open-for-bids')[0].classList.remove('active');
                         document.getElementsByClassName('option')[0].style.display = 'inherit';
                         setOption('fixed price');
+                        setItemType(1);
+                        console.log(itemType)
                     }}>Fixed Rate
                     </div>
                     <div id={'time-auction'} className={'time-auction'} onClick={() => {
@@ -227,6 +231,8 @@ function CreateNFTFormPage() {
                         // display options are block,inline, inline-block,
                         document.getElementsByClassName('option')[0].style.display = 'inherit';
                         setOption('time auction');
+                        setItemType(3);
+                        console.log(itemType)
                     }}>Time Auction
                     </div>
                     <div id={'open-for-bids'} className={'open-for-bids'}
@@ -237,6 +243,8 @@ function CreateNFTFormPage() {
                              // remove option element
                              document.getElementsByClassName('option')[0].style.display = 'none';
                              setOption('open for bids');
+                             setItemType(2);
+                             console.log(itemType)
                          }}
                     >Open For Bid
                     </div>

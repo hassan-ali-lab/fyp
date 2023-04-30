@@ -5,8 +5,8 @@ import React, {useEffect, useState} from "react";
 import Card from "./components/Card";
 import Modal1 from "./Modals/Modal1";
 import {getAllNFTs} from "./Controller";
-import {ethers} from "ethers";
 import {useMetaMask} from "metamask-react";
+import {Link} from "react-router-dom";
 
 const profilePic = process.env.PUBLIC_URL + '/profile-images/profile.png';
 const downarrow = process.env.PUBLIC_URL + '/arrow-down.svg';
@@ -47,13 +47,13 @@ const Div = styled.div`
   justify-content: flex-start;
   align-items: flex-start;
   flex: 1 1 30%; /* 1 is the flex-grow, 0 is the flex-shrink, and 30% is the flex-basis */
-  
+
 `
 const ChildDiv = styled.div`
   //width: 100%;
   //margin: 30px;/
   padding: 30px;
-  
+
 
   //float:left;
 
@@ -71,7 +71,8 @@ const Items = ({content}) => {
     return (<ContainerDiv>
         <Div>
             {content.map((item, index) => {
-                return <ChildDiv key={item.itemId}><Card key={index} {...item}/></ChildDiv>
+                return <ChildDiv key={item.itemId}><Link to={`/nft-details/${item.itemId}`}><Card
+                    key={index} {...item}/></Link></ChildDiv>
             })}
         </Div>
         <PinkButton>Load More</PinkButton>
@@ -243,7 +244,7 @@ const RightDiv = styled.div`
 function UserProfile(props) {
     const {status} = useMetaMask();
     if (status === "notConnected") {
-        window.location.href = '/wallet-authentication';
+        window.location.href = '/authentication';
     }
     const [activeButton, setActiveButton] = useState("all");
     const [name, setName] = useState("John Doe");

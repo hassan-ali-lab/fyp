@@ -60,7 +60,7 @@ const router = createBrowserRouter([
         path: "/explore-collections", element: <ExploreCollections/>,
     },
     {
-        path: "/nft-details", element: <NFTDetails/>,
+        path: "/nft-details/:id", element: <NFTDetails/>,
     },
     {
         path: "/stats", element: <CollectionStats/>,
