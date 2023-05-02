@@ -149,7 +149,7 @@ function CreateNFTFormPage() {
     const [title, setTitle] = useState("");
     const [description, setDescription] = useState("");
     const [time, setTime] = useState("0");
-    const [itemType, setItemType] = useState(1);
+    const [itemType, setItemType] = useState("1");
     const [transaction,setTransaction] = useState(false)
     useEffect(
         (e) => {
@@ -182,7 +182,7 @@ function CreateNFTFormPage() {
         }
         if(transaction){
         switch (itemType) {
-            case 1:
+            case "1":
                 if( price === "0" )
                 {
                     alert('Please fill out all fields')
@@ -195,14 +195,14 @@ function CreateNFTFormPage() {
                     console.log(e);
                 })
                 break;
-            case 2:
+            case "2":
                 createMarketItem(itemType, imageURL, title, description, "0", "0").then((v) => {
                     console.log('create market item',itemType)
                 }).catch(e => {
                     console.log(e);
                 })
                 break;
-            case 3:
+            case "3":
                 createMarketItem(itemType, imageURL, title, description, time, "0").then((v) => {
                     console.log('create market item',itemType)
                 }).catch(e => {
@@ -246,7 +246,7 @@ function CreateNFTFormPage() {
                         document.getElementsByClassName('open-for-bids')[0].classList.remove('active');
                         document.getElementsByClassName('price_option')[0].style.display = 'inherit';
                         document.getElementsByClassName('time_option')[0].style.display = 'none';
-                        setItemType(1);
+                        setItemType("1");
                     }}>Fixed Rate
                     </div>
                     <div id={'time-auction'} className={'time-auction'} onClick={() => {
@@ -256,7 +256,7 @@ function CreateNFTFormPage() {
                         // display options are block,inline, inline-block,
                         document.getElementsByClassName('price_option')[0].style.display = 'none';
                         document.getElementsByClassName('time_option')[0].style.display = 'inherit';
-                        setItemType(3);
+                        setItemType("3");
                     }}>Time Auction
                     </div>
                     <div id={'open-for-bids'} className={'open-for-bids'}
@@ -267,7 +267,8 @@ function CreateNFTFormPage() {
                              // remove option element
                              document.getElementsByClassName('price_option')[0].style.display = 'none';
                              document.getElementsByClassName('time_option')[0].style.display = 'none';
-                             setItemType(2);
+                             setItemType("2");
+
                          }}
                     >Open For Bid
                     </div>

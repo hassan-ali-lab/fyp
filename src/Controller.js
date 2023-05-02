@@ -19,11 +19,11 @@ export const sendFileToIPFS = async (imageFile, setImageData) => {
                     'pinata_secret_api_key': `${PinataAPI_SECRET}`,
                     "Content-Type": "multipart/form-data",
                 }
-            }).then((resFile)=>{
-                console.log(resFile)
-                setImageData('https://gateway.pinata.cloud/ipfs/'+resFile.data.IpfsHash)
-               
-            }
+            }).then((resFile) => {
+                    console.log(resFile)
+                    setImageData('https://gateway.pinata.cloud/ipfs/' + resFile.data.IpfsHash)
+
+                }
             )
         } catch (error) {
             if (error.response) {
@@ -45,20 +45,18 @@ export const sendFileToIPFS = async (imageFile, setImageData) => {
 
 // create nft
 export const createMarketItem = async (itemType, url, title, description, time, price) => {
-    // create the items and list them on the marketplace
-    // connect to metamask
-    const web3Modal = new Web3Modal({
-        network: 'http://127.0.0.1:7545'
-    })
+    console.log("itemType, url, title, description, time, price")
+    console.log(itemType, url, title, description, time, price)
+
+    const web3Modal = new Web3Modal()
     const connection = await web3Modal.connect()
     const provider = new ethers.providers.Web3Provider(connection)
-
-    const signer = await provider.getSigner()
+    const signer = provider.getSigner()
 
 
     let contract = new ethers.Contract(nftaddress, NFT.abi, signer)
     let transaction = await contract.mintToken(url)
-        
+    let tx = await transaction.wait()
     console.log(tx)
     let event = tx.events[0]
     let value = event.args[2]
@@ -76,6 +74,7 @@ export const createMarketItem = async (itemType, url, title, description, time, 
     contract = new ethers.Contract(marketaddress, Marketplace.abi, signer) // this is the marketplace contract
     let main_price = await contract.getListingPrice()  // this is the listing price + the price of the item
     time = BigNumber.from(time)
+
     transaction = await contract.createMarketItem(itemType, nftaddress, tokenId, price_value, title, description, time, true, {
         value: main_price
     }) // function in the marketplace contract
