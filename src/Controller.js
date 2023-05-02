@@ -7,30 +7,26 @@ import NFT from "./build/contracts/NFT.json";
 import Marketplace from "./build/contracts/Marketplace.json";
 
 // send file to pinata
-export const sendFileToIPFS = async (imageFile) => {
+export const sendFileToIPFS = async (imageFile, setImageData) => {
 
     if (imageFile) {
         try {
             const formData = new FormData();
             formData.append("file", imageFile);
-            const resFile = await axios({
+            axios({
                 method: "post", url: "https://api.pinata.cloud/pinning/pinFileToIPFS", data: formData, headers: {
                     'pinata_api_key': `${PinataAPI_KEY}`,
                     'pinata_secret_api_key': `${PinataAPI_SECRET}`,
                     "Content-Type": "multipart/form-data",
                 }
-            })
-
-            console.log("resFile: ", resFile)
-
-            const ImgHash = resFile.data.IpfsHash; // This is the hash of the image
-            // console.log(ImgHash);
-            //Take a look at your Pinata Pinned section, you will see a new imageFile added to you list.
-            return 'https://gateway.pinata.cloud/ipfs/' + ImgHash; // This is the URL of the image
+            }).then((resFile)=>{
+                console.log(resFile)
+                setImageData('https://gateway.pinata.cloud/ipfs/'+resFile.data.IpfsHash)
+               
+            }
+            )
         } catch (error) {
             if (error.response) {
-                // The request was made and the server responded with a status code
-                // that falls out of the range of 2xx
                 console.log(error.response.data);
                 console.log(error.response.status);
                 console.log(error.response.headers);
@@ -43,7 +39,6 @@ export const sendFileToIPFS = async (imageFile) => {
                 // Something happened in setting up the request that triggered an Error
                 console.log('Error', error.message);
             }
-            return "";
         }
     }
 }
@@ -63,7 +58,8 @@ export const createMarketItem = async (itemType, url, title, description, time, 
 
     let contract = new ethers.Contract(nftaddress, NFT.abi, signer)
     let transaction = await contract.mintToken(url)
-    let tx = await transaction.wait()
+        
+    console.log(tx)
     let event = tx.events[0]
     let value = event.args[2]
     console.log(tx)
@@ -126,15 +122,16 @@ export const getMyNFTs = async () => {
     const data = await marketContract.getMyNFTs();
     return await Promise.all(data.map(async (item) => {
         return ({
+            itemType: item.itemType.toNumber(),
             itemId: item.itemId.toNumber(),
-            price: ethers.utils.formatUnits(item.price.toString(), "ether"),
-            image: await nftContract.tokenURI(item.tokenId),
             nftContract: item.nftContract,
+            image: await nftContract.tokenURI(item.tokenId), // tokenId
             name: item.name,
+            description: item.description,
             creator: item.creator,
             owner: item._owner,
+            price: ethers.utils.formatUnits(item.price.toString(), "ether"),
             forSale: item.forSale,
-            description: item.description
         })
     }));
 
@@ -148,19 +145,29 @@ export const getNFT = async (id) => {
     const nftContract = new ethers.Contract(nftaddress, NFT.abi, signer);
     const marketContract = new ethers.Contract(marketaddress, Marketplace.abi, signer);
 
-    let item = await marketContract.getOneItem(id);
-    let image = await nftContract.tokenURI(item.tokenId.toNumber());
+    let item = await marketContract.getMarketItem(id);
     return ({
+        itemType: item.itemType.toNumber(),
         itemId: item.itemId.toNumber(),
-        price: ethers.utils.formatUnits(item.price.toString(), "ether"),
-        image: image,
         nftContract: item.nftContract,
+        image: await nftContract.tokenURI(item.tokenId), // tokenId
         name: item.name,
+        description: item.description,
         creator: item.creator,
         owner: item._owner,
+        price: ethers.utils.formatUnits(item.price.toString(), "ether"),
         forSale: item.forSale,
-        description: item.description
     })
+}
+
+export const getBidItem = async (itemId) => {
+    const web3Modal = new Web3Modal()
+    const connection = await web3Modal.connect()
+    const provider = new ethers.providers.Web3Provider(connection)
+    const signer = provider.getSigner()
+    const marketContract = new ethers.Contract(marketaddress, Marketplace.abi, signer);
+    return await marketContract.getBidItem(itemId);
+
 }
 
 export const buyNFT = async (tokenId, nft_price) => {
@@ -181,3 +188,42 @@ export const buyNFT = async (tokenId, nft_price) => {
     console.log("Item bought successfully")
     console.log(transaction)
 }
+
+
+export const createBid = async (itemType, itemId, bid_price) => {
+    const web3Modal = new Web3Modal()
+    const connection = await web3Modal.connect()
+    const provider = new ethers.providers.Web3Provider(connection)
+    const signer = provider.getSigner()
+    const contract = new ethers.Contract(marketaddress, Marketplace.abi, signer)
+    const price = ethers.utils.parseUnits(bid_price, 'ether')
+    const transaction = await contract.placeBid(itemType, itemId, {
+        value: price
+    })
+
+    await transaction.wait()
+    console.log("successfully")
+}
+
+
+export const isOwner = async (itemId) => {
+    const web3Modal = new Web3Modal()
+    const connection = await web3Modal.connect()
+    const provider = new ethers.providers.Web3Provider(connection)
+    const signer = provider.getSigner()
+    const contract = new ethers.Contract(marketaddress, Marketplace.abi, signer)
+    const number = BigNumber.from(itemId)
+    return (await contract.isOwner(number))
+}
+
+export const closeBidding = async (itemId) => {
+    const web3Modal = new Web3Modal()
+    const connection = await web3Modal.connect()
+    const provider = new ethers.providers.Web3Provider(connection)
+    const signer = provider.getSigner()
+    const contract = new ethers.Contract(marketaddress, Marketplace.abi, signer)
+    const transaction = await contract.closeBidding(itemId)
+    await transaction.wait()
+    console.log("successfully")
+}
+

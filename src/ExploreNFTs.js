@@ -285,6 +285,7 @@ function UserProfile(props) {
         let promise = getAllNFTs()
         promise.then((data) => {
             setContent(data)
+            console.log(data)
         })
     }, [activeButton])
 

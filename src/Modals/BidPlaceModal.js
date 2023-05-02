@@ -2,7 +2,8 @@ import styled from "styled-components";
 import Button from "../components/Button";
 import Modal from "react-modal";
 import BidSuccessModal from "./BidSuccessModal";
-import React from "react";
+import React, {useEffect} from "react";
+import {closeBidding, createBid, isOwner} from "../Controller";
 
 Modal.setAppElement('#root');
 
@@ -89,6 +90,8 @@ const Card = styled.div`
 
 
 function BidPlaceModal(props) {
+    const {nft, owner} = props;
+    const [bidAmount, setBidAmount] = React.useState("0")
 
     return (<Modal     {...props}>
 
@@ -113,7 +116,11 @@ function BidPlaceModal(props) {
                     </div>
                 </div>
                 <div className={'placeholder_title'}>Enter bid amount</div>
-                <input className={'search'} type="text" placeholder={'Minimum bid 0.4.2 ETH'}/>
+                <input className={'search'} type="text" placeholder={'Minimum bid 0.4.2 ETH'} onChange={
+                    (e) => {
+                        setBidAmount(e.target.value)
+                    }
+                }/>
 
                 <div className={'table'}>
                     <div>
@@ -128,11 +135,25 @@ function BidPlaceModal(props) {
                     </div>
                 </div>
                 <div className={'btn'}>
-                    <Button primary width={'100%'} onClick={() => {
+                    {owner ? <Button primary width={'100%'} onClick={() => {
                         // window.location.href = '/user-profile'
-                        props.onRequestClose()
-                        props.openChildModal();
-                    }} name={'Place a bid'}/>
+                        closeBidding(nft.itemType, nft.itemId, bidAmount).then((res) => {
+                            console.log(res)
+                            props.onRequestClose()
+                        }).catch((err) => {
+                            console.log(err)
+                        })
+                    }} name={'Close Bidding'}/> : <Button primary width={'100%'} onClick={() => {
+                        // window.location.href = '/user-profile'
+                        createBid(nft.itemType, nft.itemId, bidAmount).then((res) => {
+                            console.log(res)
+                            props.onRequestClose()
+                            props.openChildModal();
+                        }).catch((err) => {
+                            console.log(err)
+                        })
+                    }} name={'Place a bid'}/>}
+
                 </div>
 
             </Card>

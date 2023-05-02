@@ -8,35 +8,15 @@ import "truffle/console.sol";
 
 
 contract Marketplace is ReentrancyGuard {
-    using Counters for Counters.Counter; //  use the counter library - use the counter for the token id
-
-    /* number of items minting, number of transactions, tokens that have not been sold
-     keep track of tokens total number - tokenId
-     arrays need to know the length - help to keep track for arrays */
-
-    Counters.Counter private _tokenIds; // private - only accessible in this contract
-    // determine who is the owner of the contract
-    // charge a listing fee so the owner makes a commission
-
-    address payable owner; // payable - can receive ether
-    // we are deploying to matic the API is the same so you can use ether the same as matic
-    // they both have 18 decimal
-    // 0.045 is in the cents
+    using Counters for Counters.Counter; 
+    Counters.Counter private _tokenIds;
+    address payable owner;
     uint256 listingPrice = 0.045 ether; // 0.045 ether
-
     constructor() {
-        //set the owner to the person who deployed the contract
         console.log("hello constructor");
         owner = payable(msg.sender);
-        // msg.sender is the address of the person who deployed the contract
     }
 
-    // structs can act like objects
-    // create a struct for the market item
-
-    // type 1 sale
-    // type 2 bidding
-    // type 3 auction - timer
 
     struct MarketToken {
         uint itemType;
@@ -78,8 +58,6 @@ contract Marketplace is ReentrancyGuard {
     }
 
 
-    // tokenId return which MarketToken -  fetch which one it is
-
     mapping(uint256 => MarketToken) private idToMarketToken; // private - only accessible in this contract
     mapping(uint256 => BidToken) private idToBidToken; // private - only accessible in this contract
     mapping(uint256 => AuctionToken) private idToAuctionToken; // private - only accessible in this contract
@@ -101,52 +79,89 @@ contract Marketplace is ReentrancyGuard {
         return listingPrice;
     }
 
-    // two functions to interact with contract
-    // 1. create a market item to put it up for sale
-    // 2. create a market sale for buying and selling between parties
 
     function countMarketItems() public view returns (uint256) {
         return _tokenIds.current();
     }
 
-    function placeBid(uint itemId) public payable {
-        require(msg.value > idToBidToken[itemId].highestBid, "Bid must be higher than current highest bid.");
-        require(msg.sender != idToBidToken[itemId].highestBidder, "You are already the highest bidder.");
+    function placeBid(uint itemType, uint itemId) public payable {
         require(msg.sender != idToMarketToken[itemId]._owner, "You are the auction starter.");
-        require(idToBidToken[itemId].closed == false, "Auction is closed.");
+        require(itemType == 2 || itemType == 3, "Item is not for bidding.");
 
         uint value = msg.value;
-        if (idToBidToken[itemId].highestBidder != payable(address(0))) {
-            // Refund the previous highest bidder if they are not the owner
-            // transfer from contract to address
-            BidInfo memory previousBidder;
-            // memory - temporary storage
-            previousBidder.highestBidder = idToBidToken[itemId].highestBidder;
-            previousBidder.highestBid = idToBidToken[itemId].highestBid;
-            bids[itemId][idToBidToken[itemId].counter] = previousBidder;
 
-            idToBidToken[itemId].counter = idToBidToken[itemId].counter + 1;
+        if (itemType == 2) {
+            require(msg.value > idToBidToken[itemId].highestBid, "Bid must be higher than current highest bid.");
+            require(msg.sender != idToBidToken[itemId].highestBidder, "You are already the highest bidder.");
+            require(idToBidToken[itemId].closed == false, "Bidding is closed.");
+            require(idToBidToken[itemId].completed == false, "Bidding is completed.");
 
-            uint highestBid = idToBidToken[itemId].highestBid;
-            value = value - highestBid;
 
-            idToBidToken[itemId].highestBidder.transfer(highestBid);
-            // Refund the previous highest bidder from the highest bid amount (if there is one) to the highest bidder address (if there is one)
+            if (idToBidToken[itemId].highestBidder != payable(address(0))) {
+                // Refund the previous highest bidder if they are not the owner
+                // transfer from contract to address
+                BidInfo memory previousBidder;
+                // memory - temporary storage
+                previousBidder.highestBidder = idToBidToken[itemId].highestBidder;
+                previousBidder.highestBid = idToBidToken[itemId].highestBid;
+                bids[itemId][idToBidToken[itemId].counter] = previousBidder;
+
+                idToBidToken[itemId].counter = idToBidToken[itemId].counter + 1;
+
+                uint highestBid = idToBidToken[itemId].highestBid;
+                value = value - highestBid;
+
+                idToBidToken[itemId].highestBidder.transfer(highestBid);
+                // Refund the previous highest bidder from the highest bid amount (if there is one) to the highest bidder address (if there is one)
+            }
+
+            idToBidToken[itemId].highestBidder = payable(msg.sender);
+            // Set the new highest bidder to the current bidder address (msg.sender)
+            // transfer from address to contract
+            idToBidToken[itemId].highestBid = msg.value;
+            // Set the new highest bid
+            // transfer from address to contract
+            owner.transfer(value);
+            // owner is not visible in the contract so we need to make it payable
+
+
+            console.log("Bid placed");
+            console.log("Highest Bidder: %s", msg.sender);
+            console.log("Highest Bid: %s", msg.value);
+        } else if (itemType == 3) {
+            require(msg.value > idToAuctionToken[itemId].highestBid, "Bid must be higher than current highest bid.");
+            require(msg.sender != idToAuctionToken[itemId].highestBidder, "You are already the highest bidder.");
+            require(block.timestamp < idToAuctionToken[itemId].auctionEndTime, "Auction is over.");
+
+            if (idToAuctionToken[itemId].highestBidder != payable(address(0))) {
+                // Refund the previous highest bidder if they are not the owner
+                // transfer from contract to address
+                // create new memory instance of BidInfo
+                BidInfo memory previousBidder;
+                // memory - temporary storage
+                previousBidder.highestBidder = idToAuctionToken[itemId].highestBidder;
+                previousBidder.highestBid = idToAuctionToken[itemId].highestBid;
+                bids[itemId][idToAuctionToken[itemId].counter] = previousBidder;
+
+                idToAuctionToken[itemId].counter = idToAuctionToken[itemId].counter + 1;
+
+                uint highestBid = idToAuctionToken[itemId].highestBid;
+                value = value - highestBid;
+
+                idToAuctionToken[itemId].highestBidder.transfer(highestBid);
+                // Refund the previous highest bidder from the highest bid amount (if there is one) to the highest bidder address (if there is one)
+            }
+
+            idToAuctionToken[itemId].highestBidder = payable(msg.sender);
+            // Set the new highest bidder to the current bidder address (msg.sender)
+            // transfer from address to contract
+            idToAuctionToken[itemId].highestBid = msg.value;
+            // Set the new highest bid
+            // transfer from address to contract
+            owner.transfer(value);
+            // owner is not visible in the contract so we need to make it payable
+
         }
-
-        idToBidToken[itemId].highestBidder = payable(msg.sender);
-        // Set the new highest bidder to the current bidder address (msg.sender)
-        // transfer from address to contract
-        idToBidToken[itemId].highestBid = msg.value;
-        // Set the new highest bid
-        // transfer from address to contract
-        owner.transfer(value);
-        // owner is not visible in the contract so we need to make it payable
-
-
-        console.log("Bid placed");
-        console.log("Highest Bidder: %s", msg.sender);
-        console.log("Highest Bid: %s", msg.value);
     }
 
     function countMarketItemsForSale() public view returns (uint256) {
@@ -173,13 +188,10 @@ contract Marketplace is ReentrancyGuard {
         // nonReentrant is a modifier to prevent reentry attack
 
         // require - check if the price is greater than 0
-        require(price >= 0, "Price must be at least one wei");
+        require(price >= 0, "Price must not be negetive");
 
         // require - check if the price is equal to the listing price
-        require(
-            msg.value == listingPrice,
-            "Price must be equal to listing price"
-        );
+        require(msg.value == listingPrice,  "Price must be equal to listing price" );
 
         require(itemType == 1 || itemType == 2 || itemType == 3, "Item type must be 1, 2 or 3. 1 for sale, 2 for bidding, 3 for auction");
         // increment the token id
@@ -207,18 +219,6 @@ contract Marketplace is ReentrancyGuard {
                 price, // price of the token
                 forSale // is the token for sale
             );
-
-            console.log("Market Item Object");
-            console.log("itemType %s", idToMarketToken[itemId].itemType);
-            console.log("itemId %s", idToMarketToken[itemId].itemId);
-            console.log("nftContract %s", idToMarketToken[itemId].nftContract);
-            console.log("tokenId %s", idToMarketToken[itemId].tokenId);
-            console.log("name %s", idToMarketToken[itemId].name);
-            console.log("description %s", idToMarketToken[itemId].description);
-            console.log("creator %s", idToMarketToken[itemId].creator);
-            console.log("owner %s", idToMarketToken[itemId]._owner);
-            console.log("price %s", idToMarketToken[itemId].price);
-            console.log("forSale %s", idToMarketToken[itemId].forSale);
         }
         else if (itemType == 2) {
             //bidding
@@ -244,26 +244,6 @@ contract Marketplace is ReentrancyGuard {
                 false // completed
             );
 
-            console.log("Bid Object");
-            console.log("itemType %s", idToBidToken[itemId].itemType);
-            console.log("itemId %s", idToBidToken[itemId].itemId);
-            console.log("highestBidder %s", idToBidToken[itemId].highestBidder);
-            console.log("highestBid %s", idToBidToken[itemId].highestBid);
-            console.log("counter %s", idToBidToken[itemId].counter);
-            console.log("closed %s", idToBidToken[itemId].closed);
-            console.log("completed %s", idToBidToken[itemId].completed);
-
-            console.log("Market Item Object");
-            console.log("itemType %s", idToMarketToken[itemId].itemType);
-            console.log("itemId %s", idToMarketToken[itemId].itemId);
-            console.log("nftContract %s", idToMarketToken[itemId].nftContract);
-            console.log("tokenId %s", idToMarketToken[itemId].tokenId);
-            console.log("name %s", idToMarketToken[itemId].name);
-            console.log("description %s", idToMarketToken[itemId].description);
-            console.log("creator %s", idToMarketToken[itemId].creator);
-            console.log("owner %s", idToMarketToken[itemId]._owner);
-            console.log("price %s", idToMarketToken[itemId].price);
-            console.log("forSale %s", idToMarketToken[itemId].forSale);
         }
         else if (itemType == 3) {
             //auction
@@ -289,27 +269,6 @@ contract Marketplace is ReentrancyGuard {
                 false, // closed
                 false // completed
             );
-
-            console.log("Auction Object");
-            console.log("itemType %s", idToAuctionToken[itemId].itemType);
-            console.log("itemId %s", idToAuctionToken[itemId].itemId);
-            console.log("highestBidder %s", idToAuctionToken[itemId].highestBidder);
-            console.log("highestBid %s", idToAuctionToken[itemId].highestBid);
-            console.log("timeLimit %s", idToAuctionToken[itemId].auctionEndTime);
-            console.log("counter %s", idToAuctionToken[itemId].counter);
-            console.log("closed %s", idToAuctionToken[itemId].closed);
-            console.log("completed %s", idToAuctionToken[itemId].completed);
-
-            console.log("Market Item Object");
-            console.log("itemType %s", idToMarketToken[itemId].itemType);
-            console.log("itemId %s", idToMarketToken[itemId].itemId);
-            console.log("nftContract %s", idToMarketToken[itemId].nftContract);
-            console.log("tokenId %s", idToMarketToken[itemId].tokenId);
-            console.log("name %s", idToMarketToken[itemId].name);
-            console.log("description %s", idToMarketToken[itemId].description);
-            console.log("creator %s", idToMarketToken[itemId].creator);
-            console.log("owner %s", idToMarketToken[itemId]._owner);
-            console.log("price %s", idToMarketToken[itemId].price);
         }
         // NFT transaction - transfer the token from the seller to the contract
         IERC721(nftContract).transferFrom(msg.sender, address(this), tokenId);
@@ -404,8 +363,6 @@ contract Marketplace is ReentrancyGuard {
     }
 
     function getAllItems() public view returns (MarketToken[] memory) {
-        // instead of .owner it will be the .seller
-
         // total number of items
         uint totalItemCount = _tokenIds.current();
 
@@ -414,23 +371,50 @@ contract Marketplace is ReentrancyGuard {
 
         // loop through the total item count
         for (uint i = 0; i < totalItemCount; i++) {
-            // current item
             MarketToken storage currentItem = idToMarketToken[i + 1];
-            // current index
             items[i] = currentItem;
         }
 
-        // return the items - array of minted nfts
         return items;
     }
 
-
-    function resellMarketItem(uint itemId, uint price) public payable nonReentrant {
-        require(idToMarketToken[itemId]._owner == msg.sender, "You are not the owner of this item");
-        require(idToMarketToken[itemId].forSale == false, "This item is already for sale");
-        require(idToMarketToken[itemId].itemType == 1, "This item is not a market item");
-
-        idToMarketToken[itemId].forSale = true;
-        idToMarketToken[itemId].price = price;
+    function isOwner(uint itemId) public view returns (bool){
+        return idToMarketToken[itemId]._owner == msg.sender;
     }
+
+    function closeBidding(uint itemId) public payable nonReentrant {
+        MarketToken memory mt = idToMarketToken[itemId];
+        require(mt._owner == msg.sender, "You are not the owner of this item");
+        BidToken storage bt = idToBidToken[itemId];
+        bt.closed = true;
+    }
+
+    function isClosed(uint itemType, uint itemId) public view returns (bool){
+        require(itemType == 2 || itemType == 3, "Invalid item type");
+        if (itemType == 2) return idToBidToken[itemId].closed;
+        else if (itemType == 3) return idToAuctionToken[itemId].closed;
+        return false;
+    }
+
+    function completeBidding(uint itemType,uint itemId) public payable nonReentrant {
+        require(itemType == 2 || itemType == 3, "Invalid item type");
+        require(owner == msg.sender, "You are not the owner of this contract");
+        MarketToken memory mt = idToMarketToken[itemId];
+        if (itemType == 2){
+            BidToken storage bt = idToBidToken[itemId];
+            bt.completed = true;
+            mt._owner = bt.highestBidder;
+            IERC721(mt.nftContract).transferFrom(address(this), bt.highestBidder, mt.tokenId);
+        }
+        else if (itemType == 3) {
+            AuctionToken storage at = idToAuctionToken[itemId];
+            require(at.auctionEndTime <= block.timestamp, "Auction is not over yet");
+            require(at.completed == false, "Auction is already completed");
+            at.closed = true;
+            at.completed = true;
+            mt._owner = at.highestBidder;
+            IERC721(mt.nftContract).transferFrom(address(this), at.highestBidder, mt.tokenId);
+        }
+    }
+
 }

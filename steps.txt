@@ -29,3 +29,13 @@ react-identicons
 https://www.youtube.com/watch?v=fJIiqeevqoU&ab_channel=DappMentors
 
 
+ganache-cli -l 0xffffffff  -p 7545 -d -i 5777 -a 10 -e 1000000000 -m "candy maple cake sugar pudding cream honey rich smooth crumble sweet treat" -h
+
+-h is for hardfork
+-a is for number of accounts
+-m is for mnemonic
+-e is for ether
+-i is for network id
+-d is for deterministic
+-l is for gas limit of block
+-p is for port

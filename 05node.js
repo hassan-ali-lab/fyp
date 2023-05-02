@@ -1,6 +1,8 @@
 const Web3 = require('web3');
 const {abi:biddingAbi, address:biddingAddress} = require('./src/build/contracts/Bidding.json');
 const {biddingAddress: contractAddress} = require('./src/config')
+const express = require('express')
+
 
 
 const privateKey = '0x0000f5e80accc2c97a61ba1e94147ad9c02a1fc301886bab9974c947966fa2f4'

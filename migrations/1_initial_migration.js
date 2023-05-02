@@ -1,8 +1,6 @@
-const fs = require('fs'); // require('fs') is a Node.js module for working with the file system
-
-module.exports = function (deployer) { // deployer is an object that helps us deploy contracts
-    // deployer.deploy(Marketplace)
-    deployer.then(async function () { // deployer.then() is a promise
+const fs = require('fs');
+module.exports = function (deployer) {
+    deployer.then(async function () {
         let contractA = await artifacts.require("Marketplace").new(); // deploy the Marketplace contract
         let contractB = await artifacts.require("NFT").new(contractA.address); // deploy the NFT contract
         fs.writeFileSync('src/config.js', ` 

@@ -8,7 +8,7 @@ import BidSuccessModal from "./Modals/BidSuccessModal";
 import BidPlaceModal from "./Modals/BidPlaceModal";
 import {useMetaMask} from "metamask-react";
 import {useParams} from "react-router-dom";
-import {buyNFT, getNFT} from "./Controller";
+import {buyNFT, closeBidding, getNFT, isOwner,getBidItem} from "./Controller";
 
 const profilePic = process.env.PUBLIC_URL + '/profile-images/profile.png';
 // const downarrow = process.env.PUBLIC_URL + '/arrow-down.svg';
@@ -478,23 +478,27 @@ function NFTDetails(props) {
 
     const params = useParams();
     useEffect(() => {
-        getNFT(params.id).then((res) => {
-            setNFT(res);
-            // console.log("owner:", res.owner.toString());
-            // console.log("account:", (window.ethereum.selectedAddress).toString());
-            // console.log("equal:", res.owner.toString().toLowerCase() === (window.ethereum.selectedAddress.toString()).toLowerCase());
-            setOwner(res.owner.toString().toLowerCase() === (window.ethereum.selectedAddress.toString()).toLowerCase());
+            getNFT(params.id).then((res) => {
+                setNFT(res);
 
+                // console.log("owner:", res.owner.toString());
+                // console.log("account:", (window.ethereum.selectedAddress).toString());
+                // console.log("equal:", res.owner.toString().toLowerCase() === (window.ethereum.selectedAddress.toString()).toLowerCase());
+                isOwner(params.id).then((res) => {
+                    setOwner(res);
+                })
 
-        });
-    }, []);
+            });
+        },
+        []
+    );
     const [activeButton, setActiveButton] = useState("all");
-
-
-    // const [name, setName] = useState("John Doe");
-    // const [account, setAccount] = useState("0x13ccCb7B1b524c73486b7EC58dDA0Fa5A0763FAd")
+// const [name, setName] = useState("John Doe");
+// const [account, setAccount] = useState("0x13ccCb7B1b524c73486b7EC58dDA0Fa5A0763FAd")
     const [parentModelIsOpen, setParentModelIsOpen] = React.useState(false);
     const [childModelIsOpen, setChildModelIsOpen] = React.useState(false);
+    console.log("nft:", nft);
+
     const buttons = {
         'all': document.getElementById('all'),
         'sports': document.getElementById('sports'),
@@ -509,6 +513,9 @@ function NFTDetails(props) {
         setChildModelIsOpen(true);
     }
     useEffect(() => {
+        getBidItem(params.id).then((res) => {
+            console.log("bid:", res);
+        })
         // loop all buttons
         for (const [key, value] of Object.entries(buttons)) {
             // if the button is the active button, set the color to pink
@@ -554,6 +561,10 @@ function NFTDetails(props) {
             onRequestClose={closeParentModal}
             style={customStyles2}
             openChildModal={openChildModel}
+            nft={nft}
+            owner={owner}
+
+
         />
         <BidSuccessModal
 
@@ -608,19 +619,29 @@ function NFTDetails(props) {
                     <p>Last sale price ~ 5.93ETH</p>
                 </div>
                 <div className={'buttons'}>
-                    {!owner ?
-                        <PinkButton onClick={
-                            () => {
-                                buyNFT(nft.itemId, nft.price).then((res) => {
-                                    console.log("buy nft: ", res);
-                                })
-                            }
-                        }> Buy Now For {nft.price ? nft.price : 6.38}ETH</PinkButton> :
-                        <PinkButton disabled={true}> Buy Now
-                            For {nft.price ? nft.price : 6.38}ETH</PinkButton>}
-                    {/*<PinkButton onClick={() => {*/}
-                    {/*    setParentModelIsOpen(true)*/}
-                    {/*}}>Place a Bid</PinkButton>*/}
+                    {
+                        nft.itemType === 1 ?
+                            <PinkButton onClick={
+                                () => {
+                                    buyNFT(nft.itemId, nft.price).then((res) => {
+                                        console.log("buy nft: ", res);
+                                    })
+                                }
+                            }> Buy Now For {nft.price ? nft.price : 6.38}ETH</PinkButton> :
+                            owner ? <PinkButton onClick={() => {
+                                    console.log("Close Bidding")
+                                    closeBidding(nft.itemId).then((res) => {
+                                        console.log("close bidding: ", res);
+                                    }).catch((err) => {
+                                        console.log(err)
+                                    })
+                                }}>
+                                    Close Bidding
+                                </PinkButton>
+                                : <PinkButton onClick={() => {
+                                 setParentModelIsOpen(true);
+                                }}>Place a Bid</PinkButton>
+                    }
                 </div>
             </RightDiv>
         </Container>
