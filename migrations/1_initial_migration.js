@@ -7,5 +7,10 @@ module.exports = function (deployer) {
 export const marketaddress = "${contractA.address}";
 export const nftaddress = "${contractB.address}";
         `);
+        fs.writeFileSync('config.js', `
+const marketaddress = "${contractA.address}";
+const nftaddress = "${contractB.address}";
+module.exports = { marketaddress, nftaddress };
+`);
     });
 }

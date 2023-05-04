@@ -3,7 +3,8 @@ import Button from "../components/Button";
 import Modal from "react-modal";
 import BidSuccessModal from "./BidSuccessModal";
 import React, {useEffect} from "react";
-import {closeBidding, createBid, isOwner} from "../Controller";
+import {closeBidding, createBid, isCloseBidding, isOwner} from "../Controller";
+import axios from "axios";
 
 Modal.setAppElement('#root');
 
@@ -91,8 +92,15 @@ const Card = styled.div`
 
 function BidPlaceModal(props) {
     const {nft, owner} = props;
+    const [isClosed, setIsClosed] = React.useState(false);
     const [bidAmount, setBidAmount] = React.useState("0")
 
+    useEffect(() => {
+        isCloseBidding(nft.itemId).then((res) => {
+            console.log(res)
+            setIsClosed(res)
+        })
+    }, [nft])
     return (<Modal     {...props}>
 
             <Card>
@@ -135,15 +143,18 @@ function BidPlaceModal(props) {
                     </div>
                 </div>
                 <div className={'btn'}>
-                    {owner ? <Button primary width={'100%'} onClick={() => {
+                    {owner ? (isClosed ? "Close" : <Button primary width={'100%'} onClick={() => {
                         // window.location.href = '/user-profile'
                         closeBidding(nft.itemType, nft.itemId, bidAmount).then((res) => {
                             console.log(res)
+                            axios.get(`http://localhost:3003/auction/${nft.itemId}`).then((res) => {
+                                console.log(res)
+                            });
                             props.onRequestClose()
                         }).catch((err) => {
                             console.log(err)
                         })
-                    }} name={'Close Bidding'}/> : <Button primary width={'100%'} onClick={() => {
+                    }} name={'Close Bidding'}/>) : <Button primary width={'100%'} onClick={() => {
                         // window.location.href = '/user-profile'
                         createBid(nft.itemType, nft.itemId, bidAmount).then((res) => {
                             console.log(res)

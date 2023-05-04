@@ -8,7 +8,7 @@ import "truffle/console.sol";
 
 
 contract Marketplace is ReentrancyGuard {
-    using Counters for Counters.Counter; 
+    using Counters for Counters.Counter;
     Counters.Counter private _tokenIds;
     address payable owner;
     uint256 listingPrice = 0.045 ether; // 0.045 ether
@@ -191,7 +191,7 @@ contract Marketplace is ReentrancyGuard {
         require(price >= 0, "Price must not be negetive");
 
         // require - check if the price is equal to the listing price
-        require(msg.value == listingPrice,  "Price must be equal to listing price" );
+        require(msg.value == listingPrice, "Price must be equal to listing price");
 
         require(itemType == 1 || itemType == 2 || itemType == 3, "Item type must be 1, 2 or 3. 1 for sale, 2 for bidding, 3 for auction");
         // increment the token id
@@ -396,25 +396,45 @@ contract Marketplace is ReentrancyGuard {
         return false;
     }
 
-    function completeBidding(uint itemType,uint itemId) public payable nonReentrant {
+
+    function completeBidding(uint itemType, uint itemId) public payable nonReentrant {
         require(itemType == 2 || itemType == 3, "Invalid item type");
-        require(owner == msg.sender, "You are not the owner of this contract");
-        MarketToken memory mt = idToMarketToken[itemId];
-        if (itemType == 2){
-            BidToken storage bt = idToBidToken[itemId];
-            bt.completed = true;
-            mt._owner = bt.highestBidder;
-            IERC721(mt.nftContract).transferFrom(address(this), bt.highestBidder, mt.tokenId);
-        }
-        else if (itemType == 3) {
+
+        if (itemType == 2) {
+            address marketTokenOwner = idToMarketToken[itemId]._owner;
+            uint highestBid = idToBidToken[itemId].highestBid;
+
+            payable(marketTokenOwner).transfer(highestBid);
+
+            idToBidToken[itemId].completed = true;
+            idToMarketToken[itemId]._owner = idToBidToken[itemId].highestBidder;
+
+            address nftContract = idToMarketToken[itemId].nftContract;
+            uint tokenId = idToMarketToken[itemId].tokenId;
+            address highestBidder = idToBidToken[itemId].highestBidder;
+
+            IERC721(nftContract).safeTransferFrom(address(this), highestBidder, tokenId);
+        } else if (itemType == 3) {
+            address marketTokenOwner = idToMarketToken[itemId]._owner;
+            uint highestBid = idToAuctionToken[itemId].highestBid;
             AuctionToken storage at = idToAuctionToken[itemId];
+
             require(at.auctionEndTime <= block.timestamp, "Auction is not over yet");
             require(at.completed == false, "Auction is already completed");
-            at.closed = true;
-            at.completed = true;
-            mt._owner = at.highestBidder;
-            IERC721(mt.nftContract).transferFrom(address(this), at.highestBidder, mt.tokenId);
+
+            payable(marketTokenOwner).transfer(highestBid);
+
+            idToAuctionToken[itemId].closed = true;
+            idToAuctionToken[itemId].completed = true;
+            idToMarketToken[itemId]._owner = at.highestBidder;
+
+            address nftContract = idToMarketToken[itemId].nftContract;
+            uint tokenId = idToMarketToken[itemId].tokenId;
+            address highestBidder = at.highestBidder;
+
+            IERC721(nftContract).safeTransferFrom(address(this), highestBidder, tokenId);
         }
     }
+
 
 }

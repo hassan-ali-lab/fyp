@@ -1,35 +1,156 @@
 const Web3 = require('web3');
-const {abi: marketplaceAbi, address: addressMarketplace} = require('./src/build/contracts/Marketplace.json');
+const {marketaddress, nftaddress} = require('./config.js');
+// const {abi: marketplaceAbi, address: addressMarketplace} = require('./src/build/contracts/Marketplace.json');
 const express = require('express')
 const app = express()
 const bodyParser = require('body-parser')
 const cors = require('cors')
+const fs = require('fs');
+const {BigNumber, ethers} = require("ethers");
+const json = JSON.parse(fs.readFileSync('./src/build/contracts/Marketplace.json', 'utf8'));
 
 app.use(cors())
 app.use(bodyParser.json())
 app.use(bodyParser.urlencoded({extended: true}))
 
-const tasks = [];
-const marketaddress = "0xe78A0F7E598Cc8b0Bb87894B0F60dD2a88d6a8Ab";//0x884467182849bA788ba89300e176ebe11624C882
-
-
-const privateKey = '0x4f3edf983ac636a65a842ce7c78d9aa706d3b113bce9c46f30d7d21715b23b1d'
+const privateKey = '0x4f3edf983ac636a65a842ce7c78d9aa706d3b113bce9c46f30d7d21715b23b1d';
 const host = 'http://127.0.0.1:7545';
 const web3 = new Web3(new Web3.providers.HttpProvider(host));
-
-// Set up the account that will make the bid
 const account = web3.eth.accounts.privateKeyToAccount(privateKey);
 web3.eth.accounts.wallet.add(account);
 
-
-// console.log(addressMarketplace)
-// Create a contract instance
-const contract = new web3.eth.Contract(marketplaceAbi, marketaddress);
+const contract = new web3.eth.Contract(json.abi, marketaddress);
 console.log(contract.methods)
 
+// async function completeBidding(itemType, itemId) {
+//     // get provider
+//
+//     const provider = new ethers.providers.JsonRpcProvider(host);
+//     console.log('provider', provider)
+//     const wallet = new ethers.Wallet(privateKey, provider);
+//     const contract = new ethers.Contract(marketaddress, json.abi, wallet);
+//     // console.log('contract', contract);
+//     console.log('contract', contract)
+//     console.log('contract', contract.methods)
+//     // const nonce = await wallet.getTransactionCount();
+//     //
+//     //
+//     // const tx = await contract["completeBidding"](
+//     //     itemType,
+//     //     itemId,
+//     //     {
+//     //         nonce: nonce,
+//     //         gasLimit: 20000000,
+//     //     });
+//     //
+//     // return await tx.wait();
+// }
+async function completeBidding(itemType, itemId) {
+    // create provider
+    const provider = new ethers.providers.JsonRpcProvider("http://localhost:7545");
+    console.log('provider', provider);
 
-contract.methods.getAllItems().call().then(async function (res) {
-    console.log(res)
+    // create wallet
+    const wallet = new ethers.Wallet(privateKey, provider);
+    console.log('wallet', wallet);
+
+    // create contract instance
+    const json = require("./src/build/contracts/Marketplace.json"); // replace with actual JSON file path
+    const contract = new ethers.Contract(marketaddress, json.abi, wallet);
+    console.log('contract', contract);
+
+    // call completeBidding function
+    const tx = await contract.completeBidding(itemType, itemId, {
+        gasLimit: 20000000,
+    });
+
+    console.log('transaction hash', tx.hash);
+    await tx.wait();
+    console.log('transaction confirmed');
+
+    return tx.hash;
+}
+
+async function getMarketItem(itemId) {
+    return await contract.methods.getMarketItem(itemId).call();
+}
+
+async function getBidItem(itemId) {
+    return await contract.methods.getBidItem(itemId).call();
+}
+
+let senderAddress;
+// get accounts
+web3.eth.getAccounts().then(async (res) => {
+    senderAddress = res[0];
+});
+app.post('/', (req, res) => {
+    // get post data
+    res.headers = {
+        'Content-Type': 'application/json',
+    };
+    const {itemType, itemId} = req.body;
+
+
+    contract.methods.isClosed(BigNumber.from(`${itemType}`), BigNumber.from(`${itemId}`)).call().then(async (res) => {
+        console.log(res)
+        try {
+            if (res) {
+                completeBidding(itemType, itemId).then(async (res) => {
+                    console.log('---------------------------------')
+                    //     console.log('Bidding Closed', {res}, {itemType, itemId});
+                    //     console.log('---------------------------------')
+                    //
+                    //     getMarketItem(itemId).then(async (res) => {
+                    //         console.log(res._owner)
+                    //
+                    //         const recipientAddress = res._owner;
+                    //         console.log('recipientAddress', recipientAddress)
+                    // getBidItem(itemId).then(async (res) => {
+                    //     const amountToSend = web3.utils.toWei(res.highestBid, 'wei'); // sending 1 ETH
+                    //     const gasPrice = await web3.eth.getGasPrice();
+                    //            const gasLimit = 210000;
+                    // console.log('amountToSend', amountToSend)
+                    // console.log('gasLimit', gasLimit)
+                    // console.log('gasPrice', gasPrice)
+
+                    // const nonce = await web3.eth.getTransactionCount(senderAddress, 'latest');
+                    // console.log('nonce', nonce)
+                    /*  const tx = {
+                        from: senderAddress,
+                        to: recipientAddress,
+                        value: amountToSend,
+                        gasPrice: gasPrice,
+                        gas: gasLimit,
+                        nonce: nonce
+                    };
+
+                    const signedTx = await web3.eth.accounts.signTransaction(tx, privateKey);
+                    const txReceipt = await web3.eth.sendSignedTransaction(signedTx.rawTransaction);
+
+                    console.log('Transaction hash:', txReceipt.transactionHash);*/
+
+                    // }).catch(function (err) {
+                    //     console.log(err);
+                    // });
+
+
+                    // }).catch(function (err) {
+                    //     console.log(err);
+                    // });
+                })
+            } else {
+                console.log('Bidding Not Closed', {res}, {itemType, itemId});
+
+            }
+        } catch (e) {
+            console.log(e)
+        }
+    }).catch(function (err) {
+        console.log(err);
+    });
+//
+    res.send(JSON.stringify({status: 'ok'}));
 })
 // app.get('/auction/:id', (req, res) => {
 //     const {id} = req.params;
@@ -80,10 +201,10 @@ contract.methods.getAllItems().call().then(async function (res) {
 // //
 //
 //
-// app.listen(3003, () => {
-//     console.log('Server running on port http://localhost:3000/');
-// });
-//
+app.listen(3003, () => {
+    console.log('Server running on port http://localhost:3003/');
+});
+
 //
 // //
 // contract.methods.listBidItems().call().then(async function (res) {

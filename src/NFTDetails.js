@@ -8,7 +8,8 @@ import BidSuccessModal from "./Modals/BidSuccessModal";
 import BidPlaceModal from "./Modals/BidPlaceModal";
 import {useMetaMask} from "metamask-react";
 import {useParams} from "react-router-dom";
-import {buyNFT, closeBidding, getNFT, isOwner,getBidItem} from "./Controller";
+import {buyNFT, closeBidding, getNFT, isOwner, getBidItem, closeSale} from "./Controller";
+import axios from "axios";
 
 const profilePic = process.env.PUBLIC_URL + '/profile-images/profile.png';
 // const downarrow = process.env.PUBLIC_URL + '/arrow-down.svg';
@@ -628,7 +629,12 @@ function NFTDetails(props) {
                                     })
                                 }
                             }> Buy Now For {nft.price ? nft.price : 6.38}ETH</PinkButton> :
-                            owner ? <PinkButton onClick={() => {
+                            owner ? <div><PinkButton onClick={() => {
+                                    console.log("Close Bidding")
+                                    closeSale(nft.itemType, nft.itemId).then((res) => {
+                                        console.log("close sale: ", res);
+                                    });
+                                }}>Send Info</PinkButton><PinkButton onClick={() => {
                                     console.log("Close Bidding")
                                     closeBidding(nft.itemId).then((res) => {
                                         console.log("close bidding: ", res);
@@ -637,10 +643,11 @@ function NFTDetails(props) {
                                     })
                                 }}>
                                     Close Bidding
-                                </PinkButton>
+                                </PinkButton></div>
                                 : <PinkButton onClick={() => {
-                                 setParentModelIsOpen(true);
-                                }}>Place a Bid</PinkButton>
+                                    setParentModelIsOpen(true);
+                                }}>Place a Bid
+                                </PinkButton>
                     }
                 </div>
             </RightDiv>

@@ -159,6 +159,25 @@ export const getNFT = async (id) => {
     })
 }
 
+export const getBid = async (id) => {
+    const web3Modal = new Web3Modal()
+    const connection = await web3Modal.connect()
+    const provider = new ethers.providers.Web3Provider(connection)
+    const signer = provider.getSigner()
+    const marketContract = new ethers.Contract(marketaddress, Marketplace.abi, signer);
+
+    let item = await marketContract.getBidItem(id);
+    return ({
+        itemType: item.itemType,
+        itemId: item.itemId,
+        highestBidder: item.highestBidder,
+        highestBid: item.highestBid,
+        counter: item.counter,
+        closed: item.closed,
+        completed: item.completed
+    })
+}
+
 export const getBidItem = async (itemId) => {
     const web3Modal = new Web3Modal()
     const connection = await web3Modal.connect()
@@ -214,6 +233,15 @@ export const isOwner = async (itemId) => {
     const number = BigNumber.from(itemId)
     return (await contract.isOwner(number))
 }
+export const isCloseBidding = async (itemId) => {
+    const web3Modal = new Web3Modal()
+    const connection = await web3Modal.connect()
+    const provider = new ethers.providers.Web3Provider(connection)
+    const signer = provider.getSigner()
+    const contract = new ethers.Contract(marketaddress, Marketplace.abi, signer)
+    const number = BigNumber.from(itemId)
+    return (await contract.isClosed(number))
+}
 
 export const closeBidding = async (itemId) => {
     const web3Modal = new Web3Modal()
@@ -226,3 +254,10 @@ export const closeBidding = async (itemId) => {
     console.log("successfully")
 }
 
+export const closeSale = async (itemType, itemId) => {
+    await axios.post('http://127.0.0.1:3003/', {
+            itemType: itemType,
+            itemId: itemId
+        }
+    )
+}

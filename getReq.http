@@ -1,6 +1,12 @@
-GET http://localhost:3003/auction/1
+GET http://127.0.0.1:3003/auction/1
 
 
 
 ###
-GET http://localhost:3003/bidding/1
+POST http://127.0.0.1:3003/
+Content-Type: application/json
+
+{
+  "itemId": 1,
+  "itemType": 1
+}
