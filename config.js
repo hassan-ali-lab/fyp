@@ -1,4 +1,4 @@
 
-const marketaddress = "0xe78A0F7E598Cc8b0Bb87894B0F60dD2a88d6a8Ab";
-const nftaddress = "0x5b1869D9A4C187F2EAa108f3062412ecf0526b24";
+const marketaddress = "0x08A31Ad53EC00d54c695AbC82B4dB7C676570Dae";
+const nftaddress = "0x834772b0b71925bf50CDcf3081B8F06015389B30";
 module.exports = { marketaddress, nftaddress };

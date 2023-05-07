@@ -8,7 +8,14 @@ import BidSuccessModal from "./Modals/BidSuccessModal";
 import BidPlaceModal from "./Modals/BidPlaceModal";
 import {useMetaMask} from "metamask-react";
 import {useParams} from "react-router-dom";
-import {buyNFT, closeBidding, getNFT, isOwner, getBidItem, closeSale} from "./Controller";
+import {
+    buyNFT,
+    closeBidding,
+    getNFT,
+    isOwner,
+    getBidItem,
+    closeSale, lastItemID,
+} from "./Controller";
 import axios from "axios";
 
 const profilePic = process.env.PUBLIC_URL + '/profile-images/profile.png';
@@ -619,6 +626,7 @@ function NFTDetails(props) {
                     </div>
                     <p>Last sale price ~ 5.93ETH</p>
                 </div>
+
                 <div className={'buttons'}>
                     {
                         nft.itemType === 1 ?
@@ -629,21 +637,39 @@ function NFTDetails(props) {
                                     })
                                 }
                             }> Buy Now For {nft.price ? nft.price : 6.38}ETH</PinkButton> :
-                            owner ? <div><PinkButton onClick={() => {
-                                    console.log("Close Bidding")
-                                    closeSale(nft.itemType, nft.itemId).then((res) => {
-                                        console.log("close sale: ", res);
-                                    });
-                                }}>Send Info</PinkButton><PinkButton onClick={() => {
-                                    console.log("Close Bidding")
-                                    closeBidding(nft.itemId).then((res) => {
-                                        console.log("close bidding: ", res);
-                                    }).catch((err) => {
-                                        console.log(err)
-                                    })
-                                }}>
-                                    Close Bidding
-                                </PinkButton></div>
+                            owner ? <div>
+                                    <PinkButton onClick={() => {
+                                        console.log("Close Bidding")
+                                        console.log("nft:", nft)
+
+                                        if(nft.itemType===3){
+                                            console.log('Auction')
+                                            axios.post('http://localhost:3003/', {
+                                                itemType: nft.itemType,
+                                                itemId: nft.itemId,
+                                            }).then((res) => {
+                                                console.log("close bidding : ", res);
+                                            })
+                                        }
+                                      /*  if (nft.itemType === 3) {
+
+                                        } else {
+                                            closeBidding(nft.itemId).then((res) => {
+                                                console.log("close bidding: ", res);
+
+                                                axios.post('http://localhost:3003/', {
+                                                    itemType: nft.itemType,
+                                                    itemId: nft.itemId,
+                                                }).then((res) => {
+                                                    console.log("close bidding : ", res);
+                                                })
+                                            }).catch((err) => {
+                                                console.log(err)
+                                            })
+                                        }*/
+                                    }}>
+                                        Close Bidding
+                                    </PinkButton></div>
                                 : <PinkButton onClick={() => {
                                     setParentModelIsOpen(true);
                                 }}>Place a Bid

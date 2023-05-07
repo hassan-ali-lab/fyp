@@ -1,10 +1,11 @@
 import axios from "axios";
 import {PinataAPI_KEY, PinataAPI_SECRET} from "./Pinata";
 import Web3Modal from "web3modal";
-import {BigNumber, ethers} from "ethers";
+import {BigNumber, ethers, Wallet} from "ethers";
 import {marketaddress, nftaddress} from "./config";
 import NFT from "./build/contracts/NFT.json";
 import Marketplace from "./build/contracts/Marketplace.json";
+import web3 from "web3";
 
 // send file to pinata
 export const sendFileToIPFS = async (imageFile, setImageData) => {
@@ -135,7 +136,14 @@ export const getMyNFTs = async () => {
     }));
 
 }
-
+export const lastItemID = async () => {
+    const web3Modal = new Web3Modal()
+    const connection = await web3Modal.connect()
+    const provider = new ethers.providers.Web3Provider(connection)
+    const signer = provider.getSigner()
+    const marketContract = new ethers.Contract(marketaddress, Marketplace.abi, signer);
+    return await marketContract.countMarketItems();
+}
 export const getNFT = async (id) => {
     const web3Modal = new Web3Modal()
     const connection = await web3Modal.connect()
@@ -261,3 +269,4 @@ export const closeSale = async (itemType, itemId) => {
         }
     )
 }
+

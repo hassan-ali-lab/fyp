@@ -156,6 +156,7 @@ function BidPlaceModal(props) {
                         })
                     }} name={'Close Bidding'}/>) : <Button primary width={'100%'} onClick={() => {
                         // window.location.href = '/user-profile'
+                        console.log(nft.itemType, nft.itemId, bidAmount)
                         createBid(nft.itemType, nft.itemId, bidAmount).then((res) => {
                             console.log(res)
                             props.onRequestClose()

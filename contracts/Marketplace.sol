@@ -84,6 +84,10 @@ contract Marketplace is ReentrancyGuard {
         return _tokenIds.current();
     }
 
+    function getTime() public view returns (uint256) {
+        return block.timestamp;
+    }
+
     function placeBid(uint itemType, uint itemId) public payable {
         require(msg.sender != idToMarketToken[itemId]._owner, "You are the auction starter.");
         require(itemType == 2 || itemType == 3, "Item is not for bidding.");
@@ -114,14 +118,15 @@ contract Marketplace is ReentrancyGuard {
                 idToBidToken[itemId].highestBidder.transfer(highestBid);
                 // Refund the previous highest bidder from the highest bid amount (if there is one) to the highest bidder address (if there is one)
             }
+            idToBidToken[itemId] = BidToken(itemType, itemId, payable(msg.sender), msg.value, idToBidToken[itemId].counter, false, false);
 
-            idToBidToken[itemId].highestBidder = payable(msg.sender);
+            //            idToBidToken[itemId].highestBidder = payable(msg.sender);
             // Set the new highest bidder to the current bidder address (msg.sender)
             // transfer from address to contract
-            idToBidToken[itemId].highestBid = msg.value;
+            //            idToBidToken[itemId].highestBid = msg.value;
             // Set the new highest bid
             // transfer from address to contract
-            owner.transfer(value);
+            payable(owner).transfer(value);
             // owner is not visible in the contract so we need to make it payable
 
 
@@ -132,6 +137,8 @@ contract Marketplace is ReentrancyGuard {
             require(msg.value > idToAuctionToken[itemId].highestBid, "Bid must be higher than current highest bid.");
             require(msg.sender != idToAuctionToken[itemId].highestBidder, "You are already the highest bidder.");
             require(block.timestamp < idToAuctionToken[itemId].auctionEndTime, "Auction is over.");
+            // if block.timestamp > auctionEndTime, then auction is over and highest bidder wins
+            // if block.timestamp < auctionEndTime, then auction is still ongoing and highest bidder is still highest bidder
 
             if (idToAuctionToken[itemId].highestBidder != payable(address(0))) {
                 // Refund the previous highest bidder if they are not the owner
@@ -264,7 +271,7 @@ contract Marketplace is ReentrancyGuard {
                 itemId, // unique id for each item
                 payable(address(0)), // address of the bidder
                 0, // bid amount
-                time, // auctionEndTime
+                time + block.timestamp, // block.timestamp is in seconds in UNIX time; UNIX time is the number of seconds that have elapsed since January 1, 1970 (midnight UTC/GMT)
                 0, // bid counter
                 false, // closed
                 false // completed
@@ -392,49 +399,56 @@ contract Marketplace is ReentrancyGuard {
     function isClosed(uint itemType, uint itemId) public view returns (bool){
         require(itemType == 2 || itemType == 3, "Invalid item type");
         if (itemType == 2) return idToBidToken[itemId].closed;
-        else if (itemType == 3) return idToAuctionToken[itemId].closed;
+        else if (itemType == 3) return idToAuctionToken[itemId].auctionEndTime < block.timestamp;
         return false;
     }
 
+    function completeBidding(uint itemId) public payable {
+        require(msg.sender == owner, 'you must be owner');
 
-    function completeBidding(uint itemType, uint itemId) public payable nonReentrant {
-        require(itemType == 2 || itemType == 3, "Invalid item type");
+        MarketToken memory marketToken = idToMarketToken[itemId];
+        BidToken memory bidToken = idToBidToken[itemId];
 
-        if (itemType == 2) {
-            address marketTokenOwner = idToMarketToken[itemId]._owner;
-            uint highestBid = idToBidToken[itemId].highestBid;
 
-            payable(marketTokenOwner).transfer(highestBid);
+        uint highestBid = bidToken.highestBid;
+        address payable highestBidder = bidToken.highestBidder;
 
-            idToBidToken[itemId].completed = true;
-            idToMarketToken[itemId]._owner = idToBidToken[itemId].highestBidder;
+        address payable marketTokenOwner = marketToken._owner;
+        address nftContract = marketToken.nftContract;
+        uint256 tokenId = marketToken.tokenId;
 
-            address nftContract = idToMarketToken[itemId].nftContract;
-            uint tokenId = idToMarketToken[itemId].tokenId;
-            address highestBidder = idToBidToken[itemId].highestBidder;
+        idToBidToken[itemId].completed = true;
+        idToMarketToken[itemId]._owner = highestBidder;
 
-            IERC721(nftContract).safeTransferFrom(address(this), highestBidder, tokenId);
-        } else if (itemType == 3) {
-            address marketTokenOwner = idToMarketToken[itemId]._owner;
-            uint highestBid = idToAuctionToken[itemId].highestBid;
-            AuctionToken storage at = idToAuctionToken[itemId];
-
-            require(at.auctionEndTime <= block.timestamp, "Auction is not over yet");
-            require(at.completed == false, "Auction is already completed");
-
-            payable(marketTokenOwner).transfer(highestBid);
-
-            idToAuctionToken[itemId].closed = true;
-            idToAuctionToken[itemId].completed = true;
-            idToMarketToken[itemId]._owner = at.highestBidder;
-
-            address nftContract = idToMarketToken[itemId].nftContract;
-            uint tokenId = idToMarketToken[itemId].tokenId;
-            address highestBidder = at.highestBidder;
-
-            IERC721(nftContract).safeTransferFrom(address(this), highestBidder, tokenId);
-        }
+        marketTokenOwner.transfer(msg.value);
+        IERC721(nftContract).transferFrom(address(this), highestBidder, tokenId);
     }
 
+    function completeAuction(uint itemId) public payable {
+        require(msg.sender == owner, 'you must be owner');
+        require(idToAuctionToken[itemId].auctionEndTime < block.timestamp, 'auction is not over');
+
+        MarketToken memory marketToken = idToMarketToken[itemId];
+        AuctionToken memory auctionToken = idToAuctionToken[itemId];
+
+        address payable highestBidder = auctionToken.highestBidder;
+        if (highestBidder == address(0)) {
+            idToAuctionToken[itemId].closed = true;
+            idToAuctionToken[itemId].completed = true;
+            return;
+        }
+        // transfer the highest bid amount to the seller
+        address payable marketTokenOwner = marketToken._owner;
+        address nftContract = marketToken.nftContract;
+        uint256 tokenId = marketToken.tokenId;
+
+        idToAuctionToken[itemId].closed = true;
+        idToAuctionToken[itemId].completed = true;
+
+        idToMarketToken[itemId]._owner = highestBidder;
+
+        marketTokenOwner.transfer(msg.value);
+        IERC721(nftContract).transferFrom(address(this), highestBidder, tokenId);
+    }
 
 }

@@ -7,6 +7,6 @@ POST http://127.0.0.1:3003/
 Content-Type: application/json
 
 {
-  "itemId": 1,
-  "itemType": 1
+  "itemId": 3,
+  "itemType": 3
 }

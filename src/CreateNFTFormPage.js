@@ -4,8 +4,9 @@ import Footer from "./components/Footer";
 import React, {useEffect, useState} from "react";
 import {FileUploader} from "react-drag-drop-files";
 import Card from "./components/Card";
-import {sendFileToIPFS, createMarketItem} from "./Controller"
+import {sendFileToIPFS, createMarketItem, lastItemID} from "./Controller"
 import {useMetaMask} from "metamask-react";
+import axios from "axios";
 
 const eth = process.env.PUBLIC_URL + '/Eth.png';
 
@@ -150,68 +151,75 @@ function CreateNFTFormPage() {
     const [description, setDescription] = useState("");
     const [time, setTime] = useState("0");
     const [itemType, setItemType] = useState("1");
-    const [transaction,setTransaction] = useState(false)
+    const [transaction, setTransaction] = useState(false)
     useEffect(
         (e) => {
             console.log(e);
-            if(imageFile !== null && imageURL===null)
-            {
+            if (imageFile !== null && imageURL === null) {
 
-                sendFileToIPFS(imageFile,setImageURL).then(res => {
-                    if (imageURL||imageURL===undefined) {
+                sendFileToIPFS(imageFile, setImageURL).then(res => {
+                    if (imageURL || imageURL === undefined) {
                         console.log('Please fill image')
-                        return    
+                        return
                     }
-                console.log(imageURL)
+                    console.log(imageURL)
 
-                    })
+                })
             }
             setTransaction(true);
         }
-        , [imageFile,imageURL]
+        , [imageFile, imageURL]
     );
 
 
     const handleForm = (event) => {
         event.preventDefault()
-        console.log(title,description,imageFile,imageURL,price)
+        console.log(title, description, imageFile, imageURL, price)
         if (title === "" || description === "" || imageFile === null) {
             alert('Please fill out all fields')
-            console.log(title,description,imageFile,imageURL,price)
+            console.log(title, description, imageFile, imageURL, price)
             return
         }
-        if(transaction){
-        switch (itemType) {
-            case "1":
-                if( price === "0" )
-                {
-                    alert('Please fill out all fields')
-                    console.log('Please fill out all fields')
-                    return
-                }
-                createMarketItem(itemType, imageURL, title, description, "0", price).then((v) => {
-                    console.log('create market item',itemType)
-                }).catch(e => {
-                    console.log(e);
-                })
-                break;
-            case "2":
-                createMarketItem(itemType, imageURL, title, description, "0", "0").then((v) => {
-                    console.log('create market item',itemType)
-                }).catch(e => {
-                    console.log(e);
-                })
-                break;
-            case "3":
-                createMarketItem(itemType, imageURL, title, description, time, "0").then((v) => {
-                    console.log('create market item',itemType)
-                }).catch(e => {
-                    console.log(e);
-                })
-                break;
-            default:
+        if (transaction) {
+            switch (itemType) {
+                case "1":
+                    if (price === "0") {
+                        alert('Please fill out all fields')
+                        console.log('Please fill out all fields')
+                        return
+                    }
+                    createMarketItem(itemType, imageURL, title, description, "0", price).then((v) => {
+                        console.log('create market item', itemType)
+                    }).catch(e => {
+                        console.log(e);
+                    })
+                    break;
+                case "2":
+                    createMarketItem(itemType, imageURL, title, description, "0", "0").then((v) => {
+                        console.log('create market item', itemType)
+                    }).catch(e => {
+                        console.log(e);
+                    })
+                    break;
+                case "3":
+                    createMarketItem(itemType, imageURL, title, description, time, "0").then((v) => {
+                        console.log('create market item', itemType)
+                        lastItemID().then((res) => {
+                            console.log("last item id: ",);
+                            axios.post('http://localhost:3003', {
+                                "itemId": res.toNumber(),
+                                "itemType": 3,
+                            }).then(r => {
+                                console.log(r)
+                            })
+                        })
+                    }).catch(e => {
+                        console.log(e);
+                    })
+                    break;
+                default:
+            }
         }
-    }
     }
 
 
@@ -312,7 +320,10 @@ function CreateNFTFormPage() {
                         <input className={'input'} type="number" name="time"
                                placeholder={'time in minutes'}
                                onChange={e => {
-                                   setTime(e.target.value);
+                                   const time = Number(e.target.value) * 60;
+
+                                   console.log(time.toString());
+                                   setTime(time.toString());
                                }}
                         />
                     </label>
