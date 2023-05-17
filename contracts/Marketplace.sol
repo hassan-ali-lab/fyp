@@ -96,7 +96,6 @@ contract Marketplace is ReentrancyGuard {
 
         if (itemType == 2) {
             require(msg.value > idToBidToken[itemId].highestBid, "Bid must be higher than current highest bid.");
-            require(msg.sender != idToBidToken[itemId].highestBidder, "You are already the highest bidder.");
             require(idToBidToken[itemId].closed == false, "Bidding is closed.");
             require(idToBidToken[itemId].completed == false, "Bidding is completed.");
 
@@ -120,15 +119,7 @@ contract Marketplace is ReentrancyGuard {
             }
             idToBidToken[itemId] = BidToken(itemType, itemId, payable(msg.sender), msg.value, idToBidToken[itemId].counter, false, false);
 
-            //            idToBidToken[itemId].highestBidder = payable(msg.sender);
-            // Set the new highest bidder to the current bidder address (msg.sender)
-            // transfer from address to contract
-            //            idToBidToken[itemId].highestBid = msg.value;
-            // Set the new highest bid
-            // transfer from address to contract
             payable(owner).transfer(value);
-            // owner is not visible in the contract so we need to make it payable
-
 
             console.log("Bid placed");
             console.log("Highest Bidder: %s", msg.sender);
@@ -181,6 +172,17 @@ contract Marketplace is ReentrancyGuard {
         return count;
     }
 
+    function getAllBidInfo(uint itemId) public view returns (BidInfo[] memory) {
+        // count must be greater than 0
+        require(idToBidToken[itemId].counter > 0, "No bids for this item.");
+        // create a new array of type BidInfo
+        BidInfo[] memory bidInfo = new BidInfo[](idToBidToken[itemId].counter);
+        // loop through the bids and add them to the array
+        for (uint i = 0; i < idToBidToken[itemId].counter; i++) {
+            bidInfo[i] = bids[itemId][i];
+        }
+        return bidInfo;
+    }
 
     function createMarketItem(
         uint itemType,

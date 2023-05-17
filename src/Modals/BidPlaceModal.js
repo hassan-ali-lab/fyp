@@ -135,14 +135,14 @@ function BidPlaceModal(props) {
 
                 <div className={'table'}>
                     <div>
-                        <div>Service fee</div>
-                        <div>Marketplace fee, 5%</div>
+                        <div>Gas fee</div>
+                        <div>Marketplace fee</div>
                         <div>Total bid amount</div>
                     </div>
                     <div>
-                        <div>0.1 ETH</div>
-                        <div>0.5 ETH</div>
-                        <h1>4.12 ETH</h1>
+                        <div>~0.01 ETH</div>
+                        <div>Free</div>
+                        <h1>{bidAmount} ETH</h1>
                     </div>
                 </div>
                 <div className={'btn'}>

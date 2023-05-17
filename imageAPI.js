@@ -1,13 +1,13 @@
 const express = require('express');
 const multer = require('multer');
-const { createCanvas, loadImage } = require('canvas');
+const {createCanvas, loadImage} = require('canvas');
 
 const app = express();
 const port = 3000;
 
 // Set up multer middleware for handling file uploads
 const storage = multer.memoryStorage();
-const upload = multer({ storage: storage });
+const upload = multer({storage: storage});
 
 // Set up a route to handle POST requests to /convert
 app.post('/convert', upload.single('image'), async (req, res) => {
@@ -37,4 +37,5 @@ app.post('/convert', upload.single('image'), async (req, res) => {
 // Start the server
 app.listen(port, () => {
     console.log(`App listening at http://localhost:${port}`);
+    return "hello"
 });

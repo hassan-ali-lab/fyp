@@ -6,6 +6,7 @@ import {marketaddress, nftaddress} from "./config";
 import NFT from "./build/contracts/NFT.json";
 import Marketplace from "./build/contracts/Marketplace.json";
 import web3 from "web3";
+import Resizer from "react-image-file-resizer";
 
 // send file to pinata
 export const sendFileToIPFS = async (imageFile, setImageData) => {
@@ -173,13 +174,14 @@ export const getBid = async (id) => {
     const provider = new ethers.providers.Web3Provider(connection)
     const signer = provider.getSigner()
     const marketContract = new ethers.Contract(marketaddress, Marketplace.abi, signer);
-
     let item = await marketContract.getBidItem(id);
+    // convert to ethers item.highestBid
+    const highestBid = ethers.utils.formatUnits(item.highestBid.toString(), "ether")
     return ({
         itemType: item.itemType,
         itemId: item.itemId,
         highestBidder: item.highestBidder,
-        highestBid: item.highestBid,
+        highestBid: highestBid,
         counter: item.counter,
         closed: item.closed,
         completed: item.completed
@@ -247,7 +249,7 @@ export const isCloseBidding = async (itemId) => {
     const provider = new ethers.providers.Web3Provider(connection)
     const signer = provider.getSigner()
     const contract = new ethers.Contract(marketaddress, Marketplace.abi, signer)
-    console.log('------',itemId)
+    console.log('------', itemId)
     const number = BigNumber.from(`${itemId}`)
 
     return (await contract.isClosed(number))
@@ -270,5 +272,42 @@ export const closeSale = async (itemType, itemId) => {
             itemId: itemId
         }
     )
+}
+export const convertImage = async (image, maxHeight, maxWidth) => {
+    const res = await axios.get(image, {responseType: 'arraybuffer'})
+    let blob = new Blob([res.data], {type: 'image/png'});
+    const resizeFile = (file) =>
+        new Promise((resolve) => {
+            Resizer.imageFileResizer(
+                file,
+                maxWidth,
+                maxHeight,
+                "JPEG",
+                100,
+                0,
+                (uri) => {
+                    resolve(uri);
+                },
+                "base64"
+            );
+        });
+
+    return resizeFile(blob)
+}
+export const getAllBidInfo = async (itemId) => {
+    const web3Modal = new Web3Modal()
+    const connection = await web3Modal.connect()
+    const provider = new ethers.providers.Web3Provider(connection)
+    const signer = provider.getSigner()
+    const contract = new ethers.Contract(marketaddress, Marketplace.abi, signer)
+    const arrayOfBidInfo = await contract.getAllBidInfo(itemId)
+    const tempArray = []
+    for (let i = 0; i < arrayOfBidInfo.length; i++) {
+        tempArray.push({
+            highestBidder: arrayOfBidInfo[i].highestBidder.toString(),
+            highestBid: ethers.utils.formatUnits(arrayOfBidInfo[i].highestBid.toString(), "ether"),
+        })
+    }
+    return tempArray
 }
 

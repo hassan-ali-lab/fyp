@@ -7,6 +7,7 @@ import Modal1 from "./Modals/Modal1";
 import BidSuccessModal from "./Modals/BidSuccessModal";
 import BidPlaceModal from "./Modals/BidPlaceModal";
 import {useMetaMask} from "metamask-react";
+import Resizer from "react-image-file-resizer";
 import {Link, useParams} from "react-router-dom";
 import {
     buyNFT,
@@ -14,7 +15,7 @@ import {
     getNFT,
     isOwner,
     getBidItem,
-    closeSale, lastItemID, getBid,
+    closeSale, lastItemID, getBid, convertImage, getAllBidInfo,
 } from "./Controller";
 import axios from "axios";
 import {closeBid} from "./Service";
@@ -58,8 +59,8 @@ const Container = styled.div`
   //position: relative;
   display: flex;
   flex-direction: row;
-  justify-content: center;
-  align-items: center;
+  justify-content: flex-start;
+  align-items: flex-start;
   //padding: 60px;
 
 `
@@ -375,7 +376,7 @@ const ACard = styled.div`
   border-radius: 15px;
   width: 90%;
   margin: 50px 25px;
-  //height: 100px;
+  //height: 300px;
   padding: 30px;
   //text-align: center;
   .title {
@@ -485,31 +486,43 @@ function NFTDetails(props) {
     const [nft, setNFT] = useState({});
     const [owner, setOwner] = useState(false);
     const params = useParams();
-    const [bid, setBid] = useState({});
-
+    const [bid, setBid] = useState(null);
+    const [nftImage, setNFTImage] = useState(high);
+    const [bidLoading, setBidLoading] = useState(false);
+    const [bidInfoLoading, setBidInfoLoading] = useState(false);
+    const [bidInfos, setBidInfos] = useState(null);
     useEffect(() => {
-
             getNFT(params.id).then((res) => {
                 setNFT(res);
+                convertImage(res.image, 300, 200).then((res) => {
+                    setNFTImage(res);
+                });
                 getBid(params.id).then((res) => {
                     setBid(res);
+                    if (res.counter > 0) {
+                        setBidInfoLoading(true);
+                        getAllBidInfo(params.id).then((res) => {
+                            setBidInfos(res.reverse());
+                            setBidInfoLoading(false);
+                            console.log(res);
+                        });
+                    }
                 });
-                // console.log("owner:", res.owner.toString());
-                // console.log("account:", (window.ethereum.selectedAddress).toString());
-                // console.log("equal:", res.owner.toString().toLowerCase() === (window.ethereum.selectedAddress.toString()).toLowerCase());
                 isOwner(params.id).then((res) => {
                     setOwner(res);
                 })
-
             });
-
         },
         [params]
     );
 
+    useEffect(() => {
+        if (bid) {
+            setBidLoading(true);
+        }
+    }, [bid]);
+
     const [activeButton, setActiveButton] = useState("all");
-// const [name, setName] = useState("John Doe");
-// const [account, setAccount] = useState("0x13ccCb7B1b524c73486b7EC58dDA0Fa5A0763FAd")
     const [parentModelIsOpen, setParentModelIsOpen] = React.useState(false);
     const [childModelIsOpen, setChildModelIsOpen] = React.useState(false);
     console.log("nft:", nft);
@@ -591,8 +604,8 @@ function NFTDetails(props) {
         <Container>
             <LeftDiv>
                 <ImageCard>
-                    {nft && nft.image ? <img className={'image'} src={nft.image} alt=""/> :
-                        <img className={'image'} src={high} alt=""/>}
+                    <img className={'image'} src={nftImage} alt=""/>
+
                 </ImageCard>
             </LeftDiv>
             <RightDiv>
@@ -628,10 +641,9 @@ function NFTDetails(props) {
                 <div className={'price_div'}>
                     <p>Current Price</p>
                     <div>
-                        <h1>~{nft && nft.price ? nft.price : 6.38}ETH</h1>
-                        <h3>(${nft && nft.price ? nft.price * 1886.44 : "4,334.36"})</h3>
+                        {nft.itemType === 2 ? <h1>Bidding</h1> : <h1>~{(nft && nft.price ? nft.price : 6.38)}ETH</h1>}
+                        <h3>{nft.itemType === 2 ? "" : `(${(nft && nft.price ? nft.price * 1886.44 : "4,334.36")})`}</h3>
                     </div>
-                    <p>Last sale price ~ 5.93ETH</p>
                 </div>
 
                 <div className={'buttons'}>
@@ -665,44 +677,15 @@ function NFTDetails(props) {
                                                 console.log("close bidding : ", res);
                                             })
 
-                                            // axios.post('http://localhost:3003/', {
-                                            //     itemType: nft.itemType,
-                                            //     itemId: nft.itemId,
-                                            // }).then((res) => {
-                                            //     console.log("close bidding : ", res);
-                                            // })
                                         }).catch((err) => {
                                             console.log(err)
                                         })
                                     }
-                                    // if(nft.itemType===2){
-                                    //     console.log('Auction')
-                                    //     axios.post('http://localhost:3003/', {
-                                    //         itemType: nft.itemType,
-                                    //         itemId: nft.itemId,
-                                    //     }).then((res) => {
-                                    //         console.log("close bidding : ", res);
-                                    //     })
-                                    // }
-                                    /*  if (nft.itemType === 3) {
-
-                                      } else {
-                                          closeBidding(nft.itemId).then((res) => {
-                                              console.log("close bidding: ", res);
-
-                                              axios.post('http://localhost:3003/', {
-                                                  itemType: nft.itemType,
-                                                  itemId: nft.itemId,
-                                              }).then((res) => {
-                                                  console.log("close bidding : ", res);
-                                              })
-                                          }).catch((err) => {
-                                              console.log(err)
-                                          })
-                                      }*/
                                 }}>
                                     Close Bidding
                                 </PinkButton> : ""}
+                                <span>  </span>
+                                <span>  </span>
                                 <PinkButton onClick={() => {
                                     window.location.href = nft.image;
                                 }}>
@@ -718,20 +701,42 @@ function NFTDetails(props) {
                 </div>
             </RightDiv>
         </Container>
-        <Container>
+        <Container>{nft && nft.itemType === 2 ?
             <ACard>
                 <h3 className={'title'}>Offers</h3>
                 <div className={'columns'}>
                     <p>Price (ETH)</p>
-                    <p>USD Price</p>
-                    <p>Floor Difference</p>
-                    <p>Expiration</p>
                     <p>From</p>
-
                 </div>
+                {bidLoading ?
+                    <div className={'columns'}>
+                        <p>{bid.highestBid}</p>
+                        <p>{bid.highestBidder.toString().slice(0, 11) + "...." + bid.highestBidder.toString().slice(-3)}</p>
+                    </div>
+                    : ""}
+                {
+                    bidLoading && bid.counter > 0 ? bidInfos.map(
+                        (bidInfo, index) => {
+                            return <div className={'columns'} key={index}>
+                                <p>{bidInfo.highestBid}</p>
+                                <p>{bidInfo.highestBidder.toString().slice(0, 11) + "...." + bidInfo.highestBidder.toString().slice(-3)}</p>
+                            </div>
+                        }
+                    ) : ""
+                }
 
             </ACard>
-
+            : <ACard>
+                <h3 className={'title'}>History</h3>
+                <div className={'columns'}>
+                    <p>Price (ETH)</p>
+                    <p>From</p>
+                </div>
+                <div className={'columns'}>
+                    <p>6.38</p>
+                    <p>0x13ccCb7B1....b52</p>
+                </div>
+            </ACard>}
             <ACard>
                 <div className={'title'}>
                     <h2 className={'title-item'}>Details</h2>

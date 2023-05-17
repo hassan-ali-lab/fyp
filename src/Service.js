@@ -6,8 +6,7 @@ import {BigNumber, ethers} from "ethers";
 // const marketJson = JSON.parse(`./build/contracts/Marketplace.json', 'utf8'));
 // import {privateKey, publicKey} from "../Keys";
 
-const privateKey = '0x89dc382b68d7b5706eb0d6622e34f6b02e6bb4490f9191a0790b1c4f3523086f'
-const publicKey = '0x8F90A18FBe5db5D63cb9f4369dC9d950FA217288'
+const privateKey = '0x191f30922e06675f395ffd8be60149fb43dcafbb34a9a7770c904505581bc387'
 
 
 const host = 'http://127.0.0.1:7545';
@@ -71,8 +70,4 @@ export const closeBid = async function (itemId) {
         }).catch(function (err) {
         console.log(err);
     });
-}
-export function test() {
-    console.log('test')
-    console.log(contract)
 }
