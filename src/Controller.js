@@ -94,7 +94,7 @@ export const getAllNFTs = async () => {
     let nftContract = new ethers.Contract(nftaddress, NFT.abi, provider)
     let marketContract = new ethers.Contract(marketaddress, Marketplace.abi, signer)
 
-    const data = await marketContract.getAllItems()
+    const data = await marketContract.getMarketItems()
     return await Promise.all(data.map(async (item) => {
         return ({
             itemType: item.itemType.toNumber(),

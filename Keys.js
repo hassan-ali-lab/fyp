@@ -1,3 +1,3 @@
-const privateKey = "0xa73f779eec4c2375a2b8aa9555d81575f65aeb29229ad5d18b7c123bdef8d2c1"
-const publicKey = "0x25bD7caE39bE8E529Cca5295cF9aE80830f95697"
+const privateKey = "0x89dc382b68d7b5706eb0d6622e34f6b02e6bb4490f9191a0790b1c4f3523086f"
+const publicKey = "0x8F90A18FBe5db5D63cb9f4369dC9d950FA217288"
 module.exports = {privateKey, publicKey}

@@ -12,6 +12,7 @@ import Marketplace from "./build/contracts/Marketplace.json";
 import axios from "axios";
 import {useMetaMask} from "metamask-react";
 import {getAllNFTs, getMyNFTs} from "./Controller";
+import {Link} from "react-router-dom";
 // import pinata api
 // import pinataSDK,{} from '@pinata/sdk';
 const profilePic = process.env.PUBLIC_URL + '/profile-images/profile.png';
@@ -211,7 +212,8 @@ function UserProfile({_name, _account}) {
         return (<ContainerDiv>
             <Div>
                 {content.map((item, index) => {
-                    return <ChildDiv key={item.itemId}><Card key={index} {...item}/></ChildDiv>
+                    return <ChildDiv key={item.itemId}><Link to={`/nft-details/${item.itemId}`}><Card
+                        key={index} {...item}/></Link></ChildDiv>
                 })}
             </Div>
             <PinkButton>Load More</PinkButton>

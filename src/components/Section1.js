@@ -3,7 +3,12 @@ import Card from "./Card";
 
 // import section1Background from '../images/section1/1st Section.png'
 const section1Background = process.env.PUBLIC_URL + '/section1/1st Section.png';
-
+const image1 = process.env.PUBLIC_URL + '/section1/1.png';
+const image2 = process.env.PUBLIC_URL + '/section1/2.png';
+const image3 = process.env.PUBLIC_URL + '/section1/3.png';
+const image4 = process.env.PUBLIC_URL + '/section1/4.png';
+const image5 = process.env.PUBLIC_URL + '/section1/5.png';
+const image6 = process.env.PUBLIC_URL + '/section1/6.png';
 
 function section1(props) {
     return (<div className="section1">
@@ -36,24 +41,24 @@ function section1(props) {
         </div>
         <div className={'div2'}>
             <div className={'disp-card card1'}>
-                <Card title={'Army1934'}/>
+                <Card title={'Army1934'} image={image1}/>
             </div>
 
             <div className={'disp-card card2'}>
-                <Card title={'Army1934'}/>
+                <Card title={'Army1934'} image={image2}/>
             </div>
             <div className={'disp-card card3'}>
-                <Card title={'Army1934'}/>
+                <Card title={'Army1934'} image={image3}/>
             </div>
             <div className={'disp-card card4'}>
-                <Card title={'Army1934'}/>
+                <Card title={'Army1934'} image={image4}/>
             </div>
 
             <div className={'disp-card card5'}>
-                <Card title={'Army1934'}/>
+                <Card title={'Army1934'} image={image5}/>
             </div>
             <div className={'disp-card card6'}>
-                <Card title={'Army1934'}/>
+                <Card title={'Army1934'} image={image6}/>
             </div>
         </div>
     </div>);

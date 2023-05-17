@@ -27,7 +27,7 @@ function Hero(props) { // This is the function for this component and it is expo
             <div className={'hero-content'}>
                 <div className={'hero-text'}>
                     <h1>Buy and Sell</h1>
-                    <h1 className={'lg-digital-art'}>Digital Art and</h1>
+                    <h1 className={'lg-digital-art'}>Digital &rt</h1>
                     <h1>NFTS</h1>
                 </div>
                 <div className={'sub-heading'}>The World's Largest Digital Marketplace For Crypto Collectibles And

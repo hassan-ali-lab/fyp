@@ -257,16 +257,7 @@ function CreateNFTFormPage() {
                         setItemType("1");
                     }}>Fixed Rate
                     </div>
-                    <div id={'time-auction'} className={'time-auction'} onClick={() => {
-                        document.getElementsByClassName('fixed-price')[0].classList.remove('active');
-                        document.getElementsByClassName('time-auction')[0].classList.add('active');
-                        document.getElementsByClassName('open-for-bids')[0].classList.remove('active');
-                        // display options are block,inline, inline-block,
-                        document.getElementsByClassName('price_option')[0].style.display = 'none';
-                        document.getElementsByClassName('time_option')[0].style.display = 'inherit';
-                        setItemType("3");
-                    }}>Time Auction
-                    </div>
+
                     <div id={'open-for-bids'} className={'open-for-bids'}
                          onClick={() => {
                              document.getElementsByClassName('fixed-price')[0].classList.remove('active');
@@ -280,6 +271,17 @@ function CreateNFTFormPage() {
                          }}
                     >Open For Bid
                     </div>
+
+                    {<div id={'time-auction'} className={'time-auction'} onClick={() => {
+                        document.getElementsByClassName('fixed-price')[0].classList.remove('active');
+                        document.getElementsByClassName('time-auction')[0].classList.add('active');
+                        document.getElementsByClassName('open-for-bids')[0].classList.remove('active');
+                        // display options are block,inline, inline-block,
+                        document.getElementsByClassName('price_option')[0].style.display = 'none';
+                        document.getElementsByClassName('time_option')[0].style.display = 'inherit';
+                        setItemType("3");
+                    }}>Time Auction (coming soon)
+                    </div>}
                 </div>
                 <div className={'btn-strip'}>
                     <label>Title*<br/>
@@ -287,12 +289,13 @@ function CreateNFTFormPage() {
                                onChange={e => {
                                    setTitle(e.target.value)
                                }}
+                               required={true}
                         />
                     </label>
                 </div>
                 <div className={'btn-strip'}>
-                    <label>Description <br/>
-                        <input className={'input'} type="text" name="title"
+                    <label>Description* <br/>
+                        <input className={'input'} type="text" name="title" required={true}
                                placeholder={'e.g: This is a very limited item'}
                                onChange={e => {
                                    setDescription(e.target.value);
@@ -301,7 +304,7 @@ function CreateNFTFormPage() {
                     </label>
                 </div>
                 <div className={'btn-strip price_option'}>
-                    <label>Price<br/>
+                    <label>Price*<br/>
                         <input className={'input'} type="number" name="title"
                                placeholder={'0'}
                                onChange={e => {
@@ -316,7 +319,7 @@ function CreateNFTFormPage() {
                         display: 'none'
                     }
                 }>
-                    <label>Time<br/>
+                    <label>Time*<br/>
                         <input className={'input'} type="number" name="time"
                                placeholder={'time in minutes'}
                                onChange={e => {
@@ -328,6 +331,7 @@ function CreateNFTFormPage() {
                         />
                     </label>
                 </div>
+
                 <div className={'btn-strip-col'}>
                     <div className={'col'}>
 
@@ -363,7 +367,7 @@ function CreateNFTFormPage() {
 
                 <div className={'btn-strip'}>
 
-                    <label>Collection* <br/> <p className={'p'}>This is the collection where your item will appear. </p>
+                    <label>Collection <br/> <p className={'p'}>This is the collection where your item will appear. </p>
                         <input className={'input'} type="text" name="title"
                                placeholder={'e.g: https://yoursite.io/item/123'}/>
                     </label>

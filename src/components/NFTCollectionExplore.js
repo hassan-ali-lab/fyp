@@ -5,6 +5,12 @@ import styled from "styled-components";
 // import right_white_arrow from "../images/right_white_arrow.svg";
 const left_white_arrow = process.env.PUBLIC_URL + '/left_white_arrow.png';
 const right_white_arrow = process.env.PUBLIC_URL + '/right_white_arrow.svg';
+const a1 = process.env.PUBLIC_URL + '/collection-explorer/card1/1.png';
+const a2 = process.env.PUBLIC_URL + '/collection-explorer/card1/2.png';
+const a3 = process.env.PUBLIC_URL + '/collection-explorer/card1/3.png';
+const a4 = process.env.PUBLIC_URL + '/collection-explorer/card1/4.png';
+
+
 
 // styled components
 // Circuler Button.js
@@ -84,10 +90,11 @@ function NFTCollectionExplore() {
             }}>All NFTs</Button></Header>
             <div className={'nft-collection-body'}>
                 {/*row 1*/}
-                <Card4/>
-                <Card4/>
-                <Card4/>
-                <Card4/>
+                <Card4 mainImage={a1} image1={a2} image2={a3} image3={a4}/>
+                <Card4 mainImage={a1} image1={a2} image2={a3} image3={a4}/>
+                <Card4 mainImage={a1} image1={a2} image2={a3} image3={a4}/>
+                <Card4 mainImage={a1} image1={a2} image2={a3} image3={a4}/>
+
             </div>
             <div>
                 <CirculerBtn><img src={left_white_arrow} alt=""/></CirculerBtn>

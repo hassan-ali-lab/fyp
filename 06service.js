@@ -97,26 +97,28 @@ app.post('/', (req, response) => {
         const itemTypeBigNumber = BigNumber.from(`${itemType}`);
         const itemIdBigNumber = BigNumber.from(`${itemId}`);
         if (itemType === 2) {
-
-            isClosed(itemTypeBigNumber, itemIdBigNumber).then(
-                async function (res) {
-                    if (res) {
-                        const bidItem = await getBidItem(itemIdBigNumber);
-                        if (bidItem.completed) {
-                            response.send(JSON.stringify({success: false, status: 'completed'}));
-                        } else {
-                            const wei = ethers.utils.parseUnits(bidItem.highestBid.toString(), 'wei');
-                            console.log(wei.toString());
-                            const tx = await contract.completeBidding(itemIdBigNumber, {
-                                gasLimit: 20000000,
-                                value: wei
-                            });
-                            console.log('transaction confirmed', tx);
+            setTimeout(async () => {
+                isClosed(itemTypeBigNumber, itemIdBigNumber).then(
+                    async function (res) {
+                        if (res) {
+                            const bidItem = await getBidItem(itemIdBigNumber);
+                            if (bidItem.completed) {
+                                response.send(JSON.stringify({success: false, status: 'completed'}));
+                            } else {
+                                const wei = ethers.utils.parseUnits(bidItem.highestBid.toString(), 'wei');
+                                console.log(wei.toString());
+                                const tx = await contract.completeBidding(itemIdBigNumber, {
+                                    gasLimit: 20000000,
+                                    value: wei
+                                });
+                                console.log('transaction confirmed', tx);
+                            }
                         }
-                    }
-                }).catch(function (err) {
-                console.log(err);
-            })
+                    }).catch(function (err) {
+                    console.log(err);
+                });
+            }, 10000);
+
         } else if (itemType === 3) {
             console.log('auction');
             contract.getTime().then((res) => {

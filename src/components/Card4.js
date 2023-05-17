@@ -1,4 +1,5 @@
 import styled from 'styled-components';
+
 const avitar1 = process.env.PUBLIC_URL + '/avatar1.png';
 
 
@@ -14,7 +15,7 @@ const Container = styled.div`
   margin: 10px;
   position: relative;
   width: 300px;
-  height: 350px;
+  height: 320px;
   border: 1px solid rgba(0, 0, 0, 0);
   border-radius: 10px;
 `
@@ -26,7 +27,7 @@ const Header = styled.div`
   align-items: center;
   width: 100%;
   height: 50px;
-  padding: 0 10px;
+  padding:  10px;
   margin: 0;
   background: rgb(27, 27, 27);
 
@@ -44,7 +45,24 @@ const Body = styled.div`
   width: 100%;
   display: flex;
   flex-direction: row;
-  padding: 10px;
+  justify-content: center;
+  align-items: center;
+  padding: 10px ;
+
+  .image {
+    width: 100%;
+    height: 100%;
+    border-radius: 10px;
+    
+  }
+
+  img {
+    width: 100%;
+    height: 100%;
+    border-radius: 10px;
+
+  }
+
 `
 
 const LeftDiv = styled.div`
@@ -55,17 +73,18 @@ const LeftDiv = styled.div`
   background: white;
   //margin: 5px;
   //padding: 10px;
-//  
+  //  
 `
 const RightDiv = styled.div`
   display: flex;
-  padding: 0px 5px ;
+  padding: 0px 5px;
   flex-direction: column;
   justify-content: center;
   align-items: center;
+  margin: 0px 10px 0 ;
   width: 100%;
   height: 100%;
-  
+
   //background: white;
   div {
     background: white;
@@ -76,7 +95,7 @@ const RightDiv = styled.div`
   }
 `
 
-function Card4(props) {
+function Card4({image1, image2, image3, mainImage}) {
     return (<Container>
         <Header><img src={avitar1} alt="avitar1"/>
             <div>
@@ -85,11 +104,21 @@ function Card4(props) {
             </div>
         </Header>
         <Body>
-            <LeftDiv></LeftDiv>
+            <LeftDiv>
+                <div className={'image'}>
+                    <img src={mainImage} alt=""/>
+                </div>
+            </LeftDiv>
             <RightDiv>
-                <div></div>
-                <div></div>
-                <div></div>
+                <div className={'image'}>
+                    <img src={image1} alt=""/>
+                </div>
+                <div className={'image'}>
+                    <img src={image2} alt=""/>
+                </div>
+                <div className={'image'}>
+                    <img src={image3} alt=""/>
+                </div>
             </RightDiv>
         </Body>
     </Container>)

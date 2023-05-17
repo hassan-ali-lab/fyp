@@ -311,6 +311,9 @@ contract Marketplace is ReentrancyGuard {
         IERC721(nftContract).transferFrom(address(this), msg.sender, tokenId);
         idToMarketToken[itemId]._owner = payable(msg.sender);
         payable(owner).transfer(listingPrice);
+        idToMarketToken[itemId].forSale = false;
+
+
     }
 
     function getMyNFTs() public view returns (MarketToken[] memory) {
@@ -385,13 +388,38 @@ contract Marketplace is ReentrancyGuard {
         return items;
     }
 
+    function getMarketItems() public view returns (MarketToken[] memory) {
+        // total number of items
+        uint totalItemCount = _tokenIds.current();
+
+        // create an array of market tokens
+        MarketToken[] memory items = new MarketToken[](totalItemCount);
+        uint itemCount = 0;
+        for (uint i = 0; i < totalItemCount; i++) {
+            MarketToken storage currentItem = idToMarketToken[i + 1];
+            if (currentItem._owner != msg.sender) {
+                items[itemCount] = currentItem;
+                itemCount += 1;
+            }
+        }
+
+        MarketToken[] memory marketItems = new MarketToken[](itemCount);
+        for (uint i = 0; i < itemCount; i++) {
+            marketItems[i] = items[i];
+        }
+
+
+        return marketItems;
+    }
+
     function isOwner(uint itemId) public view returns (bool){
         return idToMarketToken[itemId]._owner == msg.sender;
     }
 
     function closeBidding(uint itemId) public payable nonReentrant {
-        MarketToken memory mt = idToMarketToken[itemId];
+        MarketToken storage mt = idToMarketToken[itemId];
         require(mt._owner == msg.sender, "You are not the owner of this item");
+        mt.forSale = false;
         BidToken storage bt = idToBidToken[itemId];
         bt.closed = true;
     }

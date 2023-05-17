@@ -1,15 +1,15 @@
 import './Card.css';
 import './Card3.css';
 
-const img1 = process.env.PUBLIC_URL + '/hero-section-1/glass.png';
+// const img1 = process.env.PUBLIC_URL + '/hero-section-1/glass.png';
 const eth = process.env.PUBLIC_URL + '/Eth.png';
 const avitar1 = process.env.PUBLIC_URL + '/avatar1.png';
 const cd3 = process.env.PUBLIC_URL + '/card3.svg';
 
 
-function Card3(props) {
+function Card3({image, title}) {
     return (<div className="card">
-        <img className={'card-image'} src={img1} alt="Avatar"/>
+        <img className={'card-image'} src={image} alt="Avatar"/>
 
 
         <div className="card-body">
@@ -17,7 +17,7 @@ function Card3(props) {
 
             <div className="container">
                 <div className="card-title">
-                    <div>{props.title}</div>
+                    <div>{title}</div>
                     <div><img src={eth} alt="eth"/></div>
                 </div>
 

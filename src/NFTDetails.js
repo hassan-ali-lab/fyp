@@ -7,14 +7,14 @@ import Modal1 from "./Modals/Modal1";
 import BidSuccessModal from "./Modals/BidSuccessModal";
 import BidPlaceModal from "./Modals/BidPlaceModal";
 import {useMetaMask} from "metamask-react";
-import {useParams} from "react-router-dom";
+import {Link, useParams} from "react-router-dom";
 import {
     buyNFT,
     closeBidding,
     getNFT,
     isOwner,
     getBidItem,
-    closeSale, lastItemID,
+    closeSale, lastItemID, getBid,
 } from "./Controller";
 import axios from "axios";
 
@@ -440,7 +440,7 @@ const ACard = styled.div`
   .columns {
     display: flex;
     flex-direction: row;
-    //justify-content: space-between;
+    justify-content: space-between;
     align-items: flex-start;
     width: 100%;
     height: 100%;
@@ -483,23 +483,29 @@ function NFTDetails(props) {
     }
     const [nft, setNFT] = useState({});
     const [owner, setOwner] = useState(false);
-
     const params = useParams();
+    const [bid, setBid] = useState({});
+
     useEffect(() => {
-            getNFT(params.id).then((res) => {
-                setNFT(res);
+            if (nft === null) {
+                getNFT(params.id).then((res) => {
+                    setNFT(res);
+                    getBid(params.id).then((res) => {
+                        setBid(res);
+                    });
+                    // console.log("owner:", res.owner.toString());
+                    // console.log("account:", (window.ethereum.selectedAddress).toString());
+                    // console.log("equal:", res.owner.toString().toLowerCase() === (window.ethereum.selectedAddress.toString()).toLowerCase());
+                    isOwner(params.id).then((res) => {
+                        setOwner(res);
+                    })
 
-                // console.log("owner:", res.owner.toString());
-                // console.log("account:", (window.ethereum.selectedAddress).toString());
-                // console.log("equal:", res.owner.toString().toLowerCase() === (window.ethereum.selectedAddress.toString()).toLowerCase());
-                isOwner(params.id).then((res) => {
-                    setOwner(res);
-                })
-
-            });
+                });
+            }
         },
-        []
+        [params]
     );
+
     const [activeButton, setActiveButton] = useState("all");
 // const [name, setName] = useState("John Doe");
 // const [account, setAccount] = useState("0x13ccCb7B1b524c73486b7EC58dDA0Fa5A0763FAd")
@@ -584,7 +590,7 @@ function NFTDetails(props) {
         <Container>
             <LeftDiv>
                 <ImageCard>
-                    {nft.image ? <img className={'image'} src={nft.image} alt=""/> :
+                    {nft && nft.image ? <img className={'image'} src={nft.image} alt=""/> :
                         <img className={'image'} src={high} alt=""/>}
                 </ImageCard>
             </LeftDiv>
@@ -621,60 +627,77 @@ function NFTDetails(props) {
                 <div className={'price_div'}>
                     <p>Current Price</p>
                     <div>
-                        <h1>~{nft.price ? nft.price : 6.38}ETH</h1>
-                        <h3>(${nft.price ? nft.price * 1886.44 : "4,334.36"})</h3>
+                        <h1>~{nft && nft.price ? nft.price : 6.38}ETH</h1>
+                        <h3>(${nft && nft.price ? nft.price * 1886.44 : "4,334.36"})</h3>
                     </div>
                     <p>Last sale price ~ 5.93ETH</p>
                 </div>
 
                 <div className={'buttons'}>
-                    {
-                        nft.itemType === 1 ?
-                            <PinkButton onClick={
-                                () => {
-                                    buyNFT(nft.itemId, nft.price).then((res) => {
-                                        console.log("buy nft: ", res);
-                                    })
-                                }
-                            }> Buy Now For {nft.price ? nft.price : 6.38}ETH</PinkButton> :
-                            owner ? <div>
-                                    <PinkButton onClick={() => {
-                                        console.log("Close Bidding")
-                                        console.log("nft:", nft)
+                    {nft && !nft.forSale ? <Link to={nft.image}><PinkButton>Link</PinkButton></Link> : <div>
+                        {
+                            nft && nft.itemType === 1 ?
+                                <PinkButton onClick={
+                                    () => {
+                                        if (nft && nft.itemType === 1) {
 
-                                        if(nft.itemType===3){
-                                            console.log('Auction')
-                                            axios.post('http://localhost:3003/', {
-                                                itemType: nft.itemType,
-                                                itemId: nft.itemId,
-                                            }).then((res) => {
-                                                console.log("close bidding : ", res);
+                                            buyNFT(nft.itemId, nft.price).then((res) => {
+                                                console.log("buy nft: ", res);
                                             })
                                         }
-                                      /*  if (nft.itemType === 3) {
+                                    }
+                                }> Buy Now For {nft && nft.price ? nft.price : 6.38}ETH</PinkButton> :
+                                owner ? <div>
+                                        <PinkButton onClick={() => {
+                                            console.log("Close Bidding")
+                                            console.log("nft:", nft)
+                                            if (nft && nft.itemType === 2) {
+                                                closeBidding(nft.itemId).then((res) => {
+                                                    console.log("close bidding: ", res);
 
-                                        } else {
-                                            closeBidding(nft.itemId).then((res) => {
-                                                console.log("close bidding: ", res);
-
-                                                axios.post('http://localhost:3003/', {
-                                                    itemType: nft.itemType,
-                                                    itemId: nft.itemId,
-                                                }).then((res) => {
-                                                    console.log("close bidding : ", res);
+                                                    axios.post('http://localhost:3003/', {
+                                                        itemType: nft.itemType,
+                                                        itemId: nft.itemId,
+                                                    }).then((res) => {
+                                                        console.log("close bidding : ", res);
+                                                    })
+                                                }).catch((err) => {
+                                                    console.log(err)
                                                 })
-                                            }).catch((err) => {
-                                                console.log(err)
-                                            })
-                                        }*/
-                                    }}>
-                                        Close Bidding
-                                    </PinkButton></div>
-                                : <PinkButton onClick={() => {
-                                    setParentModelIsOpen(true);
-                                }}>Place a Bid
-                                </PinkButton>
-                    }
+                                            }
+                                            // if(nft.itemType===2){
+                                            //     console.log('Auction')
+                                            //     axios.post('http://localhost:3003/', {
+                                            //         itemType: nft.itemType,
+                                            //         itemId: nft.itemId,
+                                            //     }).then((res) => {
+                                            //         console.log("close bidding : ", res);
+                                            //     })
+                                            // }
+                                            /*  if (nft.itemType === 3) {
+
+                                              } else {
+                                                  closeBidding(nft.itemId).then((res) => {
+                                                      console.log("close bidding: ", res);
+
+                                                      axios.post('http://localhost:3003/', {
+                                                          itemType: nft.itemType,
+                                                          itemId: nft.itemId,
+                                                      }).then((res) => {
+                                                          console.log("close bidding : ", res);
+                                                      })
+                                                  }).catch((err) => {
+                                                      console.log(err)
+                                                  })
+                                              }*/
+                                        }}>
+                                            Close Bidding
+                                        </PinkButton></div>
+                                    : <PinkButton onClick={() => {
+                                        setParentModelIsOpen(true);
+                                    }}>Place a Bid
+                                    </PinkButton>
+                        }</div>}
                 </div>
             </RightDiv>
         </Container>
@@ -682,47 +705,12 @@ function NFTDetails(props) {
             <ACard>
                 <h3 className={'title'}>Offers</h3>
                 <div className={'columns'}>
-                    <div>
-                        <p>Price (ETH)</p>
-                        <h3 className={'element'}><img src={eth} alt={'eth'}/> 0.001 ETH</h3>
-                        <h3 className={'element'}><img src={eth} alt={'eth'}/> 0.001 ETH</h3>
-                        <h3 className={'element'}><img src={eth} alt={'eth'}/> 0.001 ETH</h3>
-                        <h3 className={'element'}><img src={eth} alt={'eth'}/> 0.001 ETH</h3>
-                        <h3 className={'element'}><img src={eth} alt={'eth'}/> 0.001 ETH</h3>
-                    </div>
-                    <div>
-                        <p>USD Price</p>
-                        <h3 className={'element'}>$384.95</h3>
-                        <h3 className={'element'}>$384.95</h3>
-                        <h3 className={'element'}>$384.95</h3>
-                        <h3 className={'element'}>$384.95</h3>
-                        <h3 className={'element'}>$384.95</h3>
-                    </div>
-                    <div>
-                        <p>Floor Difference</p>
-                        <h3 className={'element'}>31% Below</h3>
-                        <h3 className={'element'}>31% Below</h3>
-                        <h3 className={'element'}>31% Below</h3>
-                        <h3 className={'element'}>31% Below</h3>
-                        <h3 className={'element'}>31% Below</h3>
-                    </div>
-                    <div>
-                        <p>Expiration</p>
-                        <h3 className={'element'}>11 min</h3>
-                        <h3 className={'element'}>11 min</h3>
-                        <h3 className={'element'}>11 min</h3>
-                        <h3 className={'element'}>11 min</h3>
-                        <h3 className={'element'}>11 min</h3>
+                    <p>Price (ETH)</p>
+                    <p>USD Price</p>
+                    <p>Floor Difference</p>
+                    <p>Expiration</p>
+                    <p>From</p>
 
-                    </div>
-                    <div>
-                        <p>From</p>
-                        <h3 className={'element'}>yes_nft</h3>
-                        <h3 className={'element'}>yes_nft</h3>
-                        <h3 className={'element'}>yes_nft</h3>
-                        <h3 className={'element'}>yes_nft</h3>
-                        <h3 className={'element'}>yes_nft</h3>
-                    </div>
                 </div>
 
             </ACard>
