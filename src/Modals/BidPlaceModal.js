@@ -96,10 +96,13 @@ function BidPlaceModal(props) {
     const [bidAmount, setBidAmount] = React.useState("0")
 
     useEffect(() => {
-        isCloseBidding(nft.itemId).then((res) => {
-            console.log(res)
-            setIsClosed(res)
-        })
+        if (nft) {
+            console.log('----',nft)
+            isCloseBidding(nft.itemId).then((res) => {
+                console.log(res)
+                setIsClosed(res)
+            })
+        }
     }, [nft])
     return (<Modal     {...props}>
 

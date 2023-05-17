@@ -17,6 +17,7 @@ import {
     closeSale, lastItemID, getBid,
 } from "./Controller";
 import axios from "axios";
+import {closeBid} from "./Service";
 
 const profilePic = process.env.PUBLIC_URL + '/profile-images/profile.png';
 // const downarrow = process.env.PUBLIC_URL + '/arrow-down.svg';
@@ -487,21 +488,21 @@ function NFTDetails(props) {
     const [bid, setBid] = useState({});
 
     useEffect(() => {
-            if (nft === null) {
-                getNFT(params.id).then((res) => {
-                    setNFT(res);
-                    getBid(params.id).then((res) => {
-                        setBid(res);
-                    });
-                    // console.log("owner:", res.owner.toString());
-                    // console.log("account:", (window.ethereum.selectedAddress).toString());
-                    // console.log("equal:", res.owner.toString().toLowerCase() === (window.ethereum.selectedAddress.toString()).toLowerCase());
-                    isOwner(params.id).then((res) => {
-                        setOwner(res);
-                    })
 
+            getNFT(params.id).then((res) => {
+                setNFT(res);
+                getBid(params.id).then((res) => {
+                    setBid(res);
                 });
-            }
+                // console.log("owner:", res.owner.toString());
+                // console.log("account:", (window.ethereum.selectedAddress).toString());
+                // console.log("equal:", res.owner.toString().toLowerCase() === (window.ethereum.selectedAddress.toString()).toLowerCase());
+                isOwner(params.id).then((res) => {
+                    setOwner(res);
+                })
+
+            });
+
         },
         [params]
     );
@@ -634,9 +635,15 @@ function NFTDetails(props) {
                 </div>
 
                 <div className={'buttons'}>
-                    {nft && !nft.forSale ? <Link to={nft.image}><PinkButton>Link</PinkButton></Link> : <div>
-                        {
-                            nft && nft.itemType === 1 ?
+
+
+                    {nft && nft.itemType === 1 ? (
+                            owner ? <PinkButton onClick={() => {
+                                    window.location.href = nft.image;
+
+                                }}>
+                                    Link
+                                </PinkButton> :
                                 <PinkButton onClick={
                                     () => {
                                         if (nft && nft.itemType === 1) {
@@ -646,58 +653,68 @@ function NFTDetails(props) {
                                             })
                                         }
                                     }
-                                }> Buy Now For {nft && nft.price ? nft.price : 6.38}ETH</PinkButton> :
-                                owner ? <div>
-                                        <PinkButton onClick={() => {
-                                            console.log("Close Bidding")
-                                            console.log("nft:", nft)
-                                            if (nft && nft.itemType === 2) {
-                                                closeBidding(nft.itemId).then((res) => {
-                                                    console.log("close bidding: ", res);
+                                }> Buy Now For {nft && nft.price ? nft.price : 6.38}ETH</PinkButton>)
+                        : (owner ? <div> {nft.forSale ?
+                                <PinkButton onClick={() => {
+                                    console.log("Close Bidding")
+                                    console.log("nft:", nft)
+                                    if (nft && nft.itemType === 2) {
+                                        closeBidding(nft.itemId).then((res) => {
+                                            console.log("close bidding: ", res);
+                                            closeBid(nft.itemId).then((res) => {
+                                                console.log("close bidding : ", res);
+                                            })
 
-                                                    axios.post('http://localhost:3003/', {
-                                                        itemType: nft.itemType,
-                                                        itemId: nft.itemId,
-                                                    }).then((res) => {
-                                                        console.log("close bidding : ", res);
-                                                    })
-                                                }).catch((err) => {
-                                                    console.log(err)
-                                                })
-                                            }
-                                            // if(nft.itemType===2){
-                                            //     console.log('Auction')
-                                            //     axios.post('http://localhost:3003/', {
-                                            //         itemType: nft.itemType,
-                                            //         itemId: nft.itemId,
-                                            //     }).then((res) => {
-                                            //         console.log("close bidding : ", res);
-                                            //     })
-                                            // }
-                                            /*  if (nft.itemType === 3) {
+                                            // axios.post('http://localhost:3003/', {
+                                            //     itemType: nft.itemType,
+                                            //     itemId: nft.itemId,
+                                            // }).then((res) => {
+                                            //     console.log("close bidding : ", res);
+                                            // })
+                                        }).catch((err) => {
+                                            console.log(err)
+                                        })
+                                    }
+                                    // if(nft.itemType===2){
+                                    //     console.log('Auction')
+                                    //     axios.post('http://localhost:3003/', {
+                                    //         itemType: nft.itemType,
+                                    //         itemId: nft.itemId,
+                                    //     }).then((res) => {
+                                    //         console.log("close bidding : ", res);
+                                    //     })
+                                    // }
+                                    /*  if (nft.itemType === 3) {
 
-                                              } else {
-                                                  closeBidding(nft.itemId).then((res) => {
-                                                      console.log("close bidding: ", res);
+                                      } else {
+                                          closeBidding(nft.itemId).then((res) => {
+                                              console.log("close bidding: ", res);
 
-                                                      axios.post('http://localhost:3003/', {
-                                                          itemType: nft.itemType,
-                                                          itemId: nft.itemId,
-                                                      }).then((res) => {
-                                                          console.log("close bidding : ", res);
-                                                      })
-                                                  }).catch((err) => {
-                                                      console.log(err)
-                                                  })
-                                              }*/
-                                        }}>
-                                            Close Bidding
-                                        </PinkButton></div>
-                                    : <PinkButton onClick={() => {
-                                        setParentModelIsOpen(true);
-                                    }}>Place a Bid
-                                    </PinkButton>
-                        }</div>}
+                                              axios.post('http://localhost:3003/', {
+                                                  itemType: nft.itemType,
+                                                  itemId: nft.itemId,
+                                              }).then((res) => {
+                                                  console.log("close bidding : ", res);
+                                              })
+                                          }).catch((err) => {
+                                              console.log(err)
+                                          })
+                                      }*/
+                                }}>
+                                    Close Bidding
+                                </PinkButton> : ""}
+                                <PinkButton onClick={() => {
+                                    window.location.href = nft.image;
+                                }}>
+                                    Link
+                                </PinkButton>
+                            </div>
+
+                            : <PinkButton onClick={() => {
+                                setParentModelIsOpen(true);
+                            }}>Place a Bid
+                            </PinkButton>)
+                    }
                 </div>
             </RightDiv>
         </Container>

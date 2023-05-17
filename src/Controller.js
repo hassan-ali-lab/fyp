@@ -247,7 +247,9 @@ export const isCloseBidding = async (itemId) => {
     const provider = new ethers.providers.Web3Provider(connection)
     const signer = provider.getSigner()
     const contract = new ethers.Contract(marketaddress, Marketplace.abi, signer)
-    const number = BigNumber.from(itemId)
+    console.log('------',itemId)
+    const number = BigNumber.from(`${itemId}`)
+
     return (await contract.isClosed(number))
 }
 

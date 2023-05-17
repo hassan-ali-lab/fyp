@@ -9,6 +9,8 @@ import FeaturedArtistsSection from "./components/FeaturedArtistsSection";
 import Footer from "./components/Footer";
 import styled from "styled-components";
 import {useMetaMask} from "metamask-react";
+import {Link} from "react-router-dom";
+import {test} from "./Service";
 
 const Container = styled.div`
   background-color: transparent;
@@ -23,6 +25,10 @@ function LandingPage(props) {
     const {status} = useMetaMask();
     return (<Container>
         <NavBar1 status={status}/>
+        <button onClick={() => {
+            test()
+        }}>Test
+        </button>
         <Hero/>
         <Section1/>
         <Section2/>
