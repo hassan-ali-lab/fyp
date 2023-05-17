@@ -5,6 +5,7 @@ import BidSuccessModal from "./BidSuccessModal";
 import React, {useEffect} from "react";
 import {closeBidding, createBid, isCloseBidding, isOwner} from "../Controller";
 import axios from "axios";
+import {Router} from "react-router-dom";
 
 Modal.setAppElement('#root');
 
@@ -94,14 +95,16 @@ function BidPlaceModal(props) {
     const {nft, owner} = props;
     const [isClosed, setIsClosed] = React.useState(false);
     const [bidAmount, setBidAmount] = React.useState("0")
-
+    const [maxBid, setMaxBid] = React.useState(0)
     useEffect(() => {
+        setMaxBid(props.maxBid)
         if (nft) {
-            console.log('----',nft)
-            isCloseBidding(nft.itemId).then((res) => {
-                console.log(res)
-                setIsClosed(res)
-            })
+            console.log('----', nft)
+            if (nft.itemType && nft.itemId)
+                isCloseBidding(nft.itemType, nft.itemId).then((res) => {
+                    console.log(res)
+                    setIsClosed(res)
+                })
         }
     }, [nft])
     return (<Modal     {...props}>
@@ -127,7 +130,7 @@ function BidPlaceModal(props) {
                     </div>
                 </div>
                 <div className={'placeholder_title'}>Enter bid amount</div>
-                <input className={'search'} type="text" placeholder={'Minimum bid 0.4.2 ETH'} onChange={
+                <input className={'search'} type="number" placeholder={`Minimum bid ${maxBid} ETH`} onChange={
                     (e) => {
                         setBidAmount(e.target.value)
                     }
@@ -142,7 +145,7 @@ function BidPlaceModal(props) {
                     <div>
                         <div>~0.01 ETH</div>
                         <div>Free</div>
-                        <h1>{bidAmount} ETH</h1>
+                        <h1>{bidAmount ? bidAmount : "0"} ETH</h1>
                     </div>
                 </div>
                 <div className={'btn'}>
@@ -159,9 +162,14 @@ function BidPlaceModal(props) {
                         })
                     }} name={'Close Bidding'}/>) : <Button primary width={'100%'} onClick={() => {
                         // window.location.href = '/user-profile'
+                        if (bidAmount < maxBid) {
+                            alert(`Bid amount must be greater than ${maxBid} ETH`)
+                            return;
+                        }
                         console.log(nft.itemType, nft.itemId, bidAmount)
                         createBid(nft.itemType, nft.itemId, bidAmount).then((res) => {
                             console.log(res)
+                            window.location.reload();
                             props.onRequestClose()
                             props.openChildModal();
                         }).catch((err) => {

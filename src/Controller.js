@@ -240,19 +240,21 @@ export const isOwner = async (itemId) => {
     const provider = new ethers.providers.Web3Provider(connection)
     const signer = provider.getSigner()
     const contract = new ethers.Contract(marketaddress, Marketplace.abi, signer)
-    const number = BigNumber.from(itemId)
-    return (await contract.isOwner(number))
+    return (await contract.isOwner( itemId))
 }
-export const isCloseBidding = async (itemId) => {
+export const isCloseBidding = async (itemType,itemId) => {
+    console.log('------', itemId)
+    console.log('------', itemType)
     const web3Modal = new Web3Modal()
     const connection = await web3Modal.connect()
     const provider = new ethers.providers.Web3Provider(connection)
     const signer = provider.getSigner()
     const contract = new ethers.Contract(marketaddress, Marketplace.abi, signer)
     console.log('------', itemId)
-    const number = BigNumber.from(`${itemId}`)
-
-    return (await contract.isClosed(number))
+    // const number = BigNumber.from(`${itemId}`)
+    const itemIdBigNumber = ethers.BigNumber.from(`${itemId}`)
+    const itemTypeBigNumber = ethers.BigNumber.from(`${itemType}`)
+    return (await contract.isClosed(itemTypeBigNumber,itemIdBigNumber))
 }
 
 export const closeBidding = async (itemId) => {

@@ -16,9 +16,11 @@ const Container = styled.div`
   justify-content: center;
   text-align: center;
   align-self: center;
-  a{
+
+  a {
     //color: #777E90;
   }
+
   color: #777E90;
   width: 50%;
   margin: 0 auto;
@@ -70,13 +72,16 @@ function CreateNFTPage(props) {
             </div>
 
             <div className={'main'}>
-                <Link to={'/create-nft-form'} ><Card>
+                <Link to={'/create-nft-form'}><Card>
                     <img className={'image'} src={image1} alt=""/>
                     <div>Single NFT</div>
                 </Card></Link>
-                <Card><img className={'image'} src={image2} alt=""/>
-                    <div>Multiple NFT</div>
-                </Card>
+                <div onClick={() => {
+                    alert('Coming Soon')
+                }}>
+                    <Card><img className={'image'} src={image2} alt=""/>
+                        <div>Multiple NFT</div>
+                    </Card></div>
             </div>
             <div>We do not own your private keys and cannot access your funds without your confirmation.</div>
 

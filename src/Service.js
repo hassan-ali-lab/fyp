@@ -6,7 +6,7 @@ import {BigNumber, ethers} from "ethers";
 // const marketJson = JSON.parse(`./build/contracts/Marketplace.json', 'utf8'));
 // import {privateKey, publicKey} from "../Keys";
 
-const privateKey = '0x191f30922e06675f395ffd8be60149fb43dcafbb34a9a7770c904505581bc387'
+const privateKey = '0x07aad1eec50207c3d3678dd09f74482c977c7ecefee8aaad90eb581a8fe8344d'
 
 
 const host = 'http://127.0.0.1:7545';

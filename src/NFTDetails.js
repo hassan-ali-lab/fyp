@@ -25,6 +25,7 @@ const profilePic = process.env.PUBLIC_URL + '/profile-images/profile.png';
 const high = process.env.PUBLIC_URL + '/high/image.png'
 const eth = process.env.PUBLIC_URL + '/Eth.png'
 
+
 const customStyles1 = {
     content: {
         top: '50%',
@@ -98,12 +99,26 @@ const ContainerDiv = styled.div`
   justify-content: flex-start;
   align-items: center;
 `
+
+
+const a1 = process.env.PUBLIC_URL + '/collection-explorer/card1/1.png';
+const a2 = process.env.PUBLIC_URL + '/collection-explorer/card1/2.png';
+const a3 = process.env.PUBLIC_URL + '/collection-explorer/card1/3.png';
+const a4 = process.env.PUBLIC_URL + '/collection-explorer/card1/4.png';
 const Items = (cards) => {
+    const price = '0.1';
+    const title = 'Title';
+    const description = 'Description';
     return <ContainerDiv><Div>
-        <ChildDiv> <Card/></ChildDiv>
-        <ChildDiv> <Card/></ChildDiv>
-        <ChildDiv> <Card/></ChildDiv>
-        <ChildDiv> <Card/></ChildDiv>
+        <ChildDiv> <Card image={a1} title={title} description={description}
+                         price={price} alt={'preview'}/> </ChildDiv>
+        <ChildDiv> <Card image={a2} title={title} description={description}
+                         price={price} alt={'preview'}/> </ChildDiv>
+        <ChildDiv> <Card image={a3} title={title} description={description}
+                         price={price} alt={'preview'}/> </ChildDiv>
+        <ChildDiv> <Card image={a4} title={title} description={description}
+                         price={price} alt={'preview'}/> </ChildDiv>
+
     </Div>
         <PinkButton>Load More</PinkButton>
     </ContainerDiv>
@@ -187,88 +202,8 @@ const LeftDiv = styled.div`
   padding: 50px;
   width: 100%;
 
-  //.row {
-  //  display: flex;
-  //  flex-direction: row;
-  //  //justify-content: space-around;
-  //  align-items: center;
-  //  //width: 100%;
-  //  text-align: center;
-  //}
+
 `
-/*
-
-const CardDiv = styled.div`
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-start;
-  align-items: center;
-  width: 100%;
-  border-radius: 15px;
-  border: 1px solid #cccaca;
-  padding: 10px;
-  margin-top: 10px;
-
-  .row {
-    display: flex;
-    flex-direction: row;
-    justify-content: space-between;
-    align-items: center;
-    width: 100%;
-    padding: 10px;
-  }
-
-
-  .body-row {
-    display: flex;
-    flex-direction: row;
-    justify-content: flex-start;
-    align-items: flex-start;
-    width: 100%;
-    padding: 10px;
-    flex-wrap: wrap;
-
-    > div {
-      margin: 10px;
-      padding: 10px;
-    }
-  }
-
-  .body-col {
-    display: flex;
-    flex-direction: column;
-    justify-content: flex-start;
-    align-items: flex-start;
-    width: 100%;
-    padding: 10px;
-    flex-wrap: wrap;
-
-    .rec {
-      padding: 10px;
-      width: 100%;
-      display: flex;
-      flex-direction: row;
-      justify-content: space-between;
-      align-items: center;
-
-      .label {
-        //font-weight: bold;
-        border: 1px solid deeppink;
-        padding: 3px;
-        border-radius: 50%;
-        background-color: deeppink;
-        color: white;
-      }
-    }
-
-    > div {
-      margin: 10px;
-      padding: 10px;
-    }
-  }
-`
-*/
-
 
 const RightDiv = styled.div`
   display: flex;
@@ -491,19 +426,22 @@ function NFTDetails(props) {
     const [bidLoading, setBidLoading] = useState(false);
     const [bidInfoLoading, setBidInfoLoading] = useState(false);
     const [bidInfos, setBidInfos] = useState(null);
+    const [maxBid, setMaxBid] = useState(0);
+    const [activeItem, setActiveItem] = useState(false);
     useEffect(() => {
             getNFT(params.id).then((res) => {
                 setNFT(res);
                 convertImage(res.image, 300, 200).then((res) => {
                     setNFTImage(res);
                 });
+                setActiveItem(res.forSale);
                 getBid(params.id).then((res) => {
                     setBid(res);
+                    setMaxBid(Number.parseInt(res.highestBid));
                     if (res.counter > 0) {
-                        setBidInfoLoading(true);
                         getAllBidInfo(params.id).then((res) => {
                             setBidInfos(res.reverse());
-                            setBidInfoLoading(false);
+                            setBidInfoLoading(true);
                             console.log(res);
                         });
                     }
@@ -591,11 +529,11 @@ function NFTDetails(props) {
             openChildModal={openChildModel}
             nft={nft}
             owner={owner}
+            maxBid={maxBid}
 
 
         />
         <BidSuccessModal
-
             isOpen={childModelIsOpen}
             onAfterOpen={afterChildOpenModal}
             onRequestClose={closeChildModal}
@@ -656,34 +594,38 @@ function NFTDetails(props) {
                                 }}>
                                     Link
                                 </PinkButton> :
-                                <PinkButton onClick={
-                                    () => {
-                                        if (nft && nft.itemType === 1) {
+                                activeItem ?
+                                    <PinkButton onClick={
+                                        () => {
 
                                             buyNFT(nft.itemId, nft.price).then((res) => {
                                                 console.log("buy nft: ", res);
                                             })
                                         }
-                                    }
-                                }> Buy Now For {nft && nft.price ? nft.price : 6.38}ETH</PinkButton>)
-                        : (owner ? <div> {nft.forSale ?
-                                <PinkButton onClick={() => {
-                                    console.log("Close Bidding")
-                                    console.log("nft:", nft)
-                                    if (nft && nft.itemType === 2) {
-                                        closeBidding(nft.itemId).then((res) => {
-                                            console.log("close bidding: ", res);
-                                            closeBid(nft.itemId).then((res) => {
-                                                console.log("close bidding : ", res);
-                                            })
-
-                                        }).catch((err) => {
-                                            console.log(err)
+                                    }> Buy Now For {nft && nft.price ? nft.price : 6.38}ETH</PinkButton> :
+                                    <PinkButton onClick={
+                                        () => {
+                                            alert("Item is Sold")
+                                        }
+                                    }>Item is Sold</PinkButton>)
+                        : nft.itemType === 2
+                            ? (owner ? <div><PinkButton onClick={() => {
+                                console.log("Close Bidding")
+                                console.log("nft:", nft)
+                                if (nft && nft.itemType === 2) {
+                                    closeBidding(nft.itemId).then((res) => {
+                                        console.log("close bidding: ", res);
+                                        closeBid(nft.itemId).then((res) => {
+                                            console.log("close bidding : ", res);
                                         })
-                                    }
-                                }}>
-                                    Close Bidding
-                                </PinkButton> : ""}
+
+                                    }).catch((err) => {
+                                        console.log(err)
+                                    })
+                                }
+                            }}>
+                                Close Bidding
+                            </PinkButton>
                                 <span>  </span>
                                 <span>  </span>
                                 <PinkButton onClick={() => {
@@ -691,12 +633,16 @@ function NFTDetails(props) {
                                 }}>
                                     Link
                                 </PinkButton>
-                            </div>
-
-                            : <PinkButton onClick={() => {
-                                setParentModelIsOpen(true);
-                            }}>Place a Bid
-                            </PinkButton>)
+                            </div> : activeItem ? <PinkButton
+                                onClick={() => {
+                                    setParentModelIsOpen(true);
+                                }}
+                            >Place Bid</PinkButton> : <PinkButton onClick={
+                                () => {
+                                    alert("Bid is Closed")
+                                }
+                            }>Bid is Closed</PinkButton>)
+                            : ""
                     }
                 </div>
             </RightDiv>
@@ -715,14 +661,14 @@ function NFTDetails(props) {
                     </div>
                     : ""}
                 {
-                    bidLoading && bid.counter > 0 ? bidInfos.map(
+                    bidInfoLoading && bidLoading && bid.counter > 0 ? bidInfos ? bidInfos.map(
                         (bidInfo, index) => {
                             return <div className={'columns'} key={index}>
                                 <p>{bidInfo.highestBid}</p>
                                 <p>{bidInfo.highestBidder.toString().slice(0, 11) + "...." + bidInfo.highestBidder.toString().slice(-3)}</p>
                             </div>
                         }
-                    ) : ""
+                    ) : "" : ""
                 }
 
             </ACard>

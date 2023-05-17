@@ -50,13 +50,7 @@ const Div = styled.div`
 
 `
 const ChildDiv = styled.div`
-  //width: 100%;
-  //margin: 30px;/
   padding: 30px;
-
-
-  //float:left;
-
 `
 
 const ContainerDiv = styled.div`
@@ -308,23 +302,20 @@ function UserProfile(props) {
         switch (value) {
             case 'all':
                 return <Items content={content}/>;
-
-
-            // return <Items/>;
             case 'sports':
-                return <Items/>;
+                return <Items content={[]}/>;
             case 'music':
-                return <Items/>;
+                return <Items content={[]}/>;
             case 'arts':
-                return <Items/>;
+                return <Items content={[]}/>;
             case 'collectibles':
-                return <Items/>;
+                return <Items content={[]}/>;
             case 'trending_cards':
-                return <Items/>;
+                return <Items content={[]}/>;
             case 'utilities':
-                return <Items/>;
+                return <Items content={[]}/>;
             case 'photography':
-                return <Items/>;
+                return <Items content={[]}/>;
         }
 
 

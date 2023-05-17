@@ -82,22 +82,6 @@ const Column = styled.div`
 
   }
 `
-// const Dropper = styled.div`
-//   height: 300px;
-//   width: 100%;
-//   display: flex;
-//   justify-content: center;
-//   align-items: center;
-//   padding: 50px 0;
-//
-//   label {
-//     width: 100%;
-//     height: 100%;
-//     border-radius: 20px;
-//
-//
-//   }
-// `
 
 const CoverImage = styled.img`
   width: 150px;
@@ -214,7 +198,7 @@ function EditProfile(props) {
         readAs: 'DataURL',
         accept: 'image/*',
         multiple: false,
-      
+
     });
 
     const [profile, setProfile] = useState(profilePic)
@@ -255,16 +239,16 @@ function EditProfile(props) {
         // props.setLogin(true)
         // localStorage.setItem("login", JSON.stringify(true))
         // localStorage.setItem("user", JSON.stringify({
-            // profile,
-            // cover,
-            // name,
-            // username,
-            // customURL,
-            // bio,
-            // email,
-            // facebook,
-            // twitter,
-            // account: props.account
+        // profile,
+        // cover,
+        // name,
+        // username,
+        // customURL,
+        // bio,
+        // email,
+        // facebook,
+        // twitter,
+        // account: props.account
         // }))
         // console.log(users)
         // window.location.href = "/"
